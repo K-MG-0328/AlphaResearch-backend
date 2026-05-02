@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 _TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 _SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
 _FILING_DOC_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/{doc}"
-_USER_AGENT = "AntelliGen contact@antelligen.com"
+_USER_AGENT = "AlphaResearch contact@alpharesearch.example"
 _DOC_FETCH_TIMEOUT = 15.0
 _BODY_MAX_CHARS = 600
 

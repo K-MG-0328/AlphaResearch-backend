@@ -87,7 +87,7 @@ rect(slide, 0, 0, 13.33, 0.75, HEADER_BG)
 rect(slide, 0, 0.75, 13.33, 0.04, ACCENT)
 txt(slide, "시스템 아키텍처", 0.35, 0.08, 7, 0.55,
     size=26, bold=True, color=WHITE)
-txt(slide, "antelligen-backend  |  FastAPI + PostgreSQL + Redis + OpenAI",
+txt(slide, "AlphaResearch-backend  |  FastAPI + PostgreSQL + Redis + OpenAI",
     7.5, 0.18, 5.5, 0.4, size=11, color=SUBTEXT, align=PP_ALIGN.RIGHT)
 
 # ── Layer labels (left side) ─────────────────

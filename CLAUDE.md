@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Antelligen Backend — FastAPI + Hexagonal Architecture + DDD (Python)
+AlphaResearch Backend — FastAPI + Hexagonal Architecture + DDD (Python)
 
 ## Commands
 
@@ -14,16 +14,9 @@ Antelligen Backend — FastAPI + Hexagonal Architecture + DDD (Python)
 
 main에 직접 푸시 금지. 항상 PR 워크플로우 사용.
 
-1. fork (예: `K-MG-0328/antelligen-backend`)에 작업 브랜치 생성 후 푸시
-2. `origin/branch` → `EDDI-RobotAcademy/main` PR 생성
+1. `main`에서 작업 브랜치 분기 후 push (`origin` = `K-MG-0328/AlphaResearch-backend`)
+2. `origin/branch` → `origin/main` PR 생성
 3. **merge commit**으로 머지 (squash 금지 — 원본 커밋 SHA 보존)
-4. 머지 후 반드시 fork sync 실행:
-   ```bash
-   git fetch upstream && git merge --ff-only upstream/main && git push origin main
-   ```
-
-- origin: 사용자 fork (예: `K-MG-0328/antelligen-*`)
-- upstream: `EDDI-RobotAcademy/antelligen-*` (원본)
 
 ## 프로젝트 구조
 

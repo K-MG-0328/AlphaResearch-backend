@@ -74,7 +74,7 @@ set_bg(slide)
 rc(slide, 1.5, 1.8, 10.3, 0.08, ACCENT)
 tb(slide, "UI 핵심 기능 소개", 1.5, 2.1, 10.3, 1.2,
    size=40, bold=True, color=ACCENT, align=PP_ALIGN.CENTER)
-tb(slide, "antelligen-frontend  |  Next.js 16 · React 19 · Jotai · Tailwind CSS",
+tb(slide, "AlphaResearch-frontend  |  Next.js 16 · React 19 · Jotai · Tailwind CSS",
    1.5, 3.5, 10.3, 0.5, size=15, color=SUBTEXT, align=PP_ALIGN.CENTER)
 
 badges = [
@@ -88,7 +88,7 @@ for label, col in badges:
        color=col, align=PP_ALIGN.CENTER)
     x += 2.2
 
-tb(slide, "antelligen-frontend  |  2026", 0.4, 6.9, 12.5, 0.4,
+tb(slide, "AlphaResearch-frontend  |  2026", 0.4, 6.9, 12.5, 0.4,
    size=11, color=SUBTEXT, align=PP_ALIGN.RIGHT)
 
 

@@ -91,7 +91,7 @@ for label, col in labels:
                 font_size=13, bold=True, color=col, align=PP_ALIGN.CENTER)
     x += 2.5
 
-add_textbox(slide, "antelligen-backend  |  2026", 0.4, 6.9, 12.5, 0.4,
+add_textbox(slide, "AlphaResearch-backend  |  2026", 0.4, 6.9, 12.5, 0.4,
             font_size=11, color=SUBTEXT, align=PP_ALIGN.RIGHT)
 
 

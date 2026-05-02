@@ -574,6 +574,6 @@ multitxt(s, [
 ], 0.6, 5.8, 12.2, 1.3, size=12, bullet="✓ ")
 
 
-out = "/Users/a82108/Documents/GitHub/Multi-Agent/antelligen-backend/docs/macro-and-schedule-notifications.pptx"
+out = "docs/macro-and-schedule-notifications.pptx"
 prs.save(out)
 print(f"Saved: {out}")
