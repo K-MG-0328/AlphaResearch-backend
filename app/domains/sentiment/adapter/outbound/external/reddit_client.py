@@ -42,7 +42,7 @@ US_SUBREDDITS = ["stocks", "investing", "wallstreetbets", "StockMarket"]
 KR_SUBREDDITS = ["Korean_Stocks"]   # 규모 작음, 보조용
 
 # Reddit이 봇 식별 가능하도록 의미 있는 UA
-DEFAULT_UA = "windows:antelligen-sentiment:v0.1 (research project)"
+DEFAULT_UA = "windows:alpharesearch-sentiment:v0.1 (research project)"
 
 
 class RedditClient(SnsCollectorPort):

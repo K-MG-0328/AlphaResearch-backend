@@ -73,7 +73,7 @@ class YahooInvestmentInfoClient(InvestmentInfoProviderPort):
             response = await client.get(
                 YAHOO_CHART_URL.format(symbol=symbol),
                 params={"range": "5d", "interval": "1d"},
-                headers={"User-Agent": "Mozilla/5.0 (antelligen-backend)"},
+                headers={"User-Agent": "Mozilla/5.0 (AlphaResearch-backend)"},
             )
 
         if response.status_code != 200:

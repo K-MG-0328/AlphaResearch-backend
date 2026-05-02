@@ -22,7 +22,7 @@
 ### 사전 조건
 
 - Docker + Docker Compose 설치
-- `.env` 파일 설정 완료 (`backend/antelligen-backend/.env`)
+- `.env` 파일 설정 완료 (`backend/AlphaResearch-backend/.env`)
 
 ### 실행 순서
 
@@ -33,9 +33,9 @@ docker compose up -d
 
 # 2. 패키지 설치 + 서버 실행 (한 줄)
 docker exec -it fastapi_app bash -c \
-  "pip install -r /app/antelligen-backend/requirements.txt -q && \
+  "pip install -r /app/AlphaResearch-backend/requirements.txt -q && \
    pip install 'setuptools<82' -q && \
-   cd /app/antelligen-backend && \
+   cd /app/AlphaResearch-backend && \
    uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 ```
 
@@ -653,7 +653,7 @@ docker exec -it redis_cache redis-cli FLUSHALL
 # 시총 Top 300 갱신
 docker exec -it fastapi_app python -c "
 import asyncio, sys
-sys.path.insert(0, '/app/antelligen-backend')
+sys.path.insert(0, '/app/AlphaResearch-backend')
 async def run():
     from app.infrastructure.database.database import AsyncSessionLocal
     from app.domains.disclosure.adapter.outbound.external.dart_corp_code_client import DartCorpCodeClient
