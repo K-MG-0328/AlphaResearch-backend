@@ -51,11 +51,11 @@ async def get_nasdaq_bars(
     db: AsyncSession = Depends(get_db),
 ):
     """나스닥(^IXIC) OHLCV 일봉 데이터를 반환합니다."""
-    effective = _validate_chart_interval(chart_interval)
+    chart_interval = _validate_chart_interval(chart_interval)
 
     result = await GetNasdaqBarsUseCase(
         nasdaq_repository=NasdaqRepositoryImpl(db),
-    ).execute(period=effective)
+    ).execute(period=chart_interval)
 
     return BaseResponse.ok(data=result)
 
@@ -65,11 +65,11 @@ async def get_macro_data(
     chart_interval: str = Query("1M", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Y"),
 ):
     """거시경제 지표(기준금리·CPI·실업률)를 FRED API에서 실시간 조회합니다."""
-    effective = _validate_chart_interval(chart_interval)
+    chart_interval = _validate_chart_interval(chart_interval)
 
     result = await GetMacroDataUseCase(
         fred_macro_port=FredMacroClient(),
-    ).execute(period=effective)
+    ).execute(period=chart_interval)
 
     return BaseResponse.ok(data=result)
 
@@ -82,11 +82,11 @@ async def get_economic_events(
 
     chart_interval별 날짜 범위: 1D=365일 / 1W=1,095일 / 1M=1,825일 / 1Y=7,300일
     """
-    effective = _validate_chart_interval(chart_interval)
+    chart_interval = _validate_chart_interval(chart_interval)
 
     result = await GetEconomicEventsUseCase(
         fred_macro_port=FredMacroClient(),
-    ).execute(period=effective)
+    ).execute(period=chart_interval)
 
     return BaseResponse.ok(data=result)
 
@@ -98,12 +98,12 @@ async def get_stock_bars(
     redis: aioredis.Redis = Depends(get_redis),
 ):
     """개별 종목 OHLCV 시계열 데이터를 반환합니다. (yfinance + Redis 캐시)"""
-    effective = _validate_chart_interval(chart_interval)
+    chart_interval = _validate_chart_interval(chart_interval)
 
     result = await GetStockBarsUseCase(
         stock_bars_port=YahooFinanceStockClient(),
         redis=redis,
-    ).execute(ticker=ticker.upper(), period=effective)
+    ).execute(ticker=ticker.upper(), period=chart_interval)
 
     return BaseResponse.ok(data=result)
 
