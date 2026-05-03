@@ -9,6 +9,12 @@ from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.chart_interval import (
+    VALID_LOOKBACK_RANGES,
+    normalize_chart_interval,
+    validate_chart_interval,
+    validate_lookback_range,
+)
 from app.common.exception.app_exception import AppException
 from app.common.response.base_response import BaseResponse
 from app.domains.dashboard.adapter.outbound.external.fred_macro_client import FredMacroClient
@@ -40,7 +46,6 @@ from app.domains.history_agent.application.usecase.get_anomaly_causality_usecase
 from app.domains.history_agent.application.usecase.history_agent_usecase import HistoryAgentUseCase
 from app.domains.dashboard.adapter.outbound.external.yahoo_finance_stock_client import (
     YahooFinanceStockClient,
-    normalize_chart_interval,
 )
 from app.domains.history_agent.di import (
     get_anomaly_causality_usecase,
@@ -58,10 +63,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/history-agent", tags=["HistoryAgent"])
 
-_VALID_PERIODS = {"1D", "1W", "1M", "1Y", "1Q"}  # "1Y"는 하위 호환 (→ 내부 "1Q" 매핑)
-_VALID_CHART_INTERVALS = {"1D", "1W", "1M", "1Q"}
-# /macro-timeline은 더 긴 역사적 범위를 커버하도록 별도 세트 사용.
-_VALID_MACRO_PERIODS = {"1M", "3M", "6M", "1Y", "2Y", "5Y", "10Y"}
 _VALID_MACRO_REGIONS = {"US", "KR", "GLOBAL"}
 _MACRO_CACHE_VERSION = "v1"
 _SSE_KEEPALIVE_SECONDS = 15
@@ -151,12 +152,7 @@ async def get_timeline(
     - ETF (SPY 등): MACRO + NEWS + holdings constituent 이벤트 수집
     - 기타(MUTUALFUND/CRYPTO 등 미지원): 빈 타임라인 + asset_type=<원본값>
     """
-    effective = normalize_chart_interval(chart_interval)
-    if effective not in _VALID_CHART_INTERVALS:
-        raise AppException(
-            status_code=400,
-            message=f"유효하지 않은 chart_interval입니다. 사용 가능: {', '.join(sorted(_VALID_CHART_INTERVALS))}",
-        )
+    effective = validate_chart_interval(chart_interval)
 
     ticker = normalize_yfinance_ticker(ticker.upper())
     corp_code = await _resolve_corp_code(ticker, db)
@@ -180,12 +176,7 @@ async def stream_timeline(
     클라이언트 disconnect 시 백그라운드 태스크를 취소해 불필요한 LLM/외부 호출을 차단합니다.
     15초마다 keepalive 프레임(`: ping`)을 송신합니다.
     """
-    effective = normalize_chart_interval(chart_interval)
-    if effective not in _VALID_CHART_INTERVALS:
-        raise AppException(
-            status_code=400,
-            message=f"유효하지 않은 chart_interval입니다. 사용 가능: {', '.join(sorted(_VALID_CHART_INTERVALS))}",
-        )
+    effective = validate_chart_interval(chart_interval)
     period = effective  # 내부 변수는 그대로 period 이름 유지(UseCase 파라미터 호환)
 
     ticker = normalize_yfinance_ticker(ticker.upper())
@@ -262,8 +253,9 @@ async def stream_timeline(
 async def get_macro_timeline(
     lookback_range: str = Query(
         "1Y",
+        alias="lookbackRange",
         description=(
-            f"조회 기간(과거): {', '.join(sorted(_VALID_MACRO_PERIODS))}. "
+            f"조회 기간(과거): {', '.join(sorted(VALID_LOOKBACK_RANGES))}. "
             "ADR-0001: chart_interval(봉 단위) 와 다른 시맨틱."
         ),
     ),
@@ -287,12 +279,7 @@ async def get_macro_timeline(
             status_code=400,
             message=f"유효하지 않은 region입니다. 사용 가능: {', '.join(sorted(_VALID_MACRO_REGIONS))}",
         )
-    lookback_upper = lookback_range.upper()
-    if lookback_upper not in _VALID_MACRO_PERIODS:
-        raise AppException(
-            status_code=400,
-            message=f"유효하지 않은 lookback_range입니다. 사용 가능: {', '.join(sorted(_VALID_MACRO_PERIODS))}",
-        )
+    lookback_upper = validate_lookback_range(lookback_range)
 
     settings = get_settings()
     effective_limit = limit if limit is not None else settings.macro_timeline_top_n
@@ -341,8 +328,9 @@ async def get_macro_timeline(
 async def stream_macro_timeline(
     lookback_range: str = Query(
         "1Y",
+        alias="lookbackRange",
         description=(
-            f"조회 기간(과거): {', '.join(sorted(_VALID_MACRO_PERIODS))}. "
+            f"조회 기간(과거): {', '.join(sorted(VALID_LOOKBACK_RANGES))}. "
             "ADR-0001: chart_interval(봉 단위) 와 다른 시맨틱."
         ),
     ),
@@ -367,12 +355,7 @@ async def stream_macro_timeline(
             status_code=400,
             message=f"유효하지 않은 region입니다. 사용 가능: {', '.join(sorted(_VALID_MACRO_REGIONS))}",
         )
-    lookback_upper = lookback_range.upper()
-    if lookback_upper not in _VALID_MACRO_PERIODS:
-        raise AppException(
-            status_code=400,
-            message=f"유효하지 않은 lookback_range입니다. 사용 가능: {', '.join(sorted(_VALID_MACRO_PERIODS))}",
-        )
+    lookback_upper = validate_lookback_range(lookback_range)
 
     settings = get_settings()
     effective_limit = limit if limit is not None else settings.macro_timeline_top_n
@@ -503,12 +486,7 @@ async def get_anomaly_bars(
 
     봉 단위별 adaptive threshold (k=2.5 × σ + floor) 로 평상시 대비 특이한 봉만 선별.
     """
-    effective = normalize_chart_interval(chart_interval)
-    if effective not in _VALID_CHART_INTERVALS:
-        raise AppException(
-            status_code=400,
-            message=f"유효하지 않은 chart_interval입니다. 사용 가능: {', '.join(sorted(_VALID_CHART_INTERVALS))}",
-        )
+    effective = validate_chart_interval(chart_interval)
 
     ticker = normalize_yfinance_ticker(ticker.upper())
     usecase = DetectAnomalyBarsUseCase(stock_bars_port=YahooFinanceStockClient())

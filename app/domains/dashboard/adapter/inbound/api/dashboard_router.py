@@ -4,7 +4,7 @@ import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.exception.app_exception import AppException
+from app.common.chart_interval import VALID_CHART_INTERVALS, validate_chart_interval
 from app.common.response.base_response import BaseResponse
 from app.domains.dashboard.adapter.outbound.external.fred_macro_client import FredMacroClient
 from app.domains.dashboard.adapter.outbound.external.yahoo_finance_stock_client import (
@@ -32,26 +32,18 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
-_VALID_PERIODS = {"1D", "1W", "1M", "1Y"}
-
-
-def _validate_chart_interval(chart_interval: str) -> str:
-    """ADR-0001: chart_interval 만 허용. `period` deprecation 완료 (Phase 3)."""
-    if chart_interval not in _VALID_PERIODS:
-        raise AppException(
-            status_code=400,
-            message=f"유효하지 않은 chart_interval입니다. 사용 가능: {', '.join(sorted(_VALID_PERIODS))}",
-        )
-    return chart_interval
+_CHART_INTERVAL_DESC = (
+    f"봉 단위: {' | '.join(sorted(VALID_CHART_INTERVALS))} (레거시 '1Y'는 '1Q'로 자동 정규화)"
+)
 
 
 @router.get("/nasdaq", response_model=BaseResponse[NasdaqBarsResponse])
 async def get_nasdaq_bars(
-    chart_interval: str = Query("1M", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Y"),
+    chart_interval: str = Query("1M", alias="chartInterval", description=_CHART_INTERVAL_DESC),
     db: AsyncSession = Depends(get_db),
 ):
     """나스닥(^IXIC) OHLCV 일봉 데이터를 반환합니다."""
-    chart_interval = _validate_chart_interval(chart_interval)
+    chart_interval = validate_chart_interval(chart_interval)
 
     result = await GetNasdaqBarsUseCase(
         nasdaq_repository=NasdaqRepositoryImpl(db),
@@ -62,10 +54,10 @@ async def get_nasdaq_bars(
 
 @router.get("/macro", response_model=BaseResponse[MacroDataResponse])
 async def get_macro_data(
-    chart_interval: str = Query("1M", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Y"),
+    chart_interval: str = Query("1M", alias="chartInterval", description=_CHART_INTERVAL_DESC),
 ):
     """거시경제 지표(기준금리·CPI·실업률)를 FRED API에서 실시간 조회합니다."""
-    chart_interval = _validate_chart_interval(chart_interval)
+    chart_interval = validate_chart_interval(chart_interval)
 
     result = await GetMacroDataUseCase(
         fred_macro_port=FredMacroClient(),
@@ -76,13 +68,13 @@ async def get_macro_data(
 
 @router.get("/economic-events", response_model=BaseResponse[EconomicEventsResponse])
 async def get_economic_events(
-    chart_interval: str = Query("1M", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Y"),
+    chart_interval: str = Query("1M", alias="chartInterval", description=_CHART_INTERVAL_DESC),
 ):
     """경제 이벤트(기준금리·CPI·실업률 발표 이력)를 FRED API에서 실시간 조회합니다.
 
-    chart_interval별 날짜 범위: 1D=365일 / 1W=1,095일 / 1M=1,825일 / 1Y=7,300일
+    chart_interval별 날짜 범위: 1D=365일 / 1W=1,095일 / 1M=1,825일 / 1Q=7,300일
     """
-    chart_interval = _validate_chart_interval(chart_interval)
+    chart_interval = validate_chart_interval(chart_interval)
 
     result = await GetEconomicEventsUseCase(
         fred_macro_port=FredMacroClient(),
@@ -94,11 +86,11 @@ async def get_economic_events(
 @router.get("/stocks/{ticker}/bars", response_model=BaseResponse[StockBarsResponse])
 async def get_stock_bars(
     ticker: str,
-    chart_interval: str = Query("1D", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Y"),
+    chart_interval: str = Query("1D", alias="chartInterval", description=_CHART_INTERVAL_DESC),
     redis: aioredis.Redis = Depends(get_redis),
 ):
     """개별 종목 OHLCV 시계열 데이터를 반환합니다. (yfinance + Redis 캐시)"""
-    chart_interval = _validate_chart_interval(chart_interval)
+    chart_interval = validate_chart_interval(chart_interval)
 
     result = await GetStockBarsUseCase(
         stock_bars_port=YahooFinanceStockClient(),

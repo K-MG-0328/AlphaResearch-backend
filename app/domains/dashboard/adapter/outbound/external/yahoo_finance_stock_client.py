@@ -4,6 +4,7 @@ from typing import List
 
 import yfinance as yf
 
+from app.common.chart_interval import normalize_chart_interval
 from app.domains.dashboard.adapter.outbound.external._yfinance_retry import (
     yfinance_call_with_retry,
 )
@@ -35,15 +36,6 @@ _CHART_INTERVAL_TO_LOOKBACK: dict[str, str] = {
     "1M": "5y",
     "1Q": "max",
 }
-
-# 레거시 "1Y" 입력을 새 "1Q"로 매핑 (§13.2, §17). 하위 호환 유지.
-_LEGACY_INTERVAL_ALIAS: dict[str, str] = {"1Y": "1Q"}
-
-
-def normalize_chart_interval(chart_interval: str) -> str:
-    """레거시 별칭 정규화 — 외부 입력 경계에서 호출."""
-    return _LEGACY_INTERVAL_ALIAS.get(chart_interval, chart_interval)
-
 
 def _resolve_yfinance_params(chart_interval: str) -> tuple[str, str]:
     """chart_interval("1D"/"1W"/"1M"/"1Q") → (yfinance_period, yfinance_interval)."""
