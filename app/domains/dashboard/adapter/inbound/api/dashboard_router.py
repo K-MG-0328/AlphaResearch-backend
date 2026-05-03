@@ -7,9 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.exception.app_exception import AppException
 from app.common.response.base_response import BaseResponse
 from app.domains.dashboard.adapter.outbound.external.fred_macro_client import FredMacroClient
-from app.domains.dashboard.adapter.outbound.external.yahoo_finance_nasdaq_client import (
-    YahooFinanceNasdaqClient,
-)
 from app.domains.dashboard.adapter.outbound.external.yahoo_finance_stock_client import (
     YahooFinanceStockClient,
 )
@@ -20,9 +17,6 @@ from app.domains.dashboard.application.response.economic_event_response import E
 from app.domains.dashboard.application.response.macro_data_response import MacroDataResponse
 from app.domains.dashboard.application.response.nasdaq_bar_response import NasdaqBarsResponse
 from app.domains.dashboard.application.response.stock_bar_response import StockBarsResponse
-from app.domains.dashboard.application.usecase.collect_nasdaq_bars_usecase import (
-    CollectNasdaqBarsUseCase,
-)
 from app.domains.dashboard.application.usecase.get_economic_events_usecase import (
     GetEconomicEventsUseCase,
 )
@@ -117,17 +111,6 @@ async def get_stock_bars(
 # §13.4 C: /price-events 엔드포인트 철거.
 # PRICE 카테고리(LOW_52W/HIGH_52W/SURGE/PLUNGE/GAP)는 `/history-agent/anomaly-bars`
 # 엔드포인트가 차트 이상치 봉 마커로 대체.
-
-
-@router.post("/nasdaq/collect", response_model=BaseResponse[dict])
-async def collect_nasdaq_bars(
-    period: str = Query("5d", description="yfinance period (예: 5d, 1mo, 1y)"),
-    db: AsyncSession = Depends(get_db),
-):
-    """나스닥 일봉 데이터를 yfinance에서 즉시 수집합니다. (수동 트리거용)"""
-    saved = await CollectNasdaqBarsUseCase(
-        yahoo_finance_port=YahooFinanceNasdaqClient(),
-        nasdaq_repository=NasdaqRepositoryImpl(db),
-    ).execute(period=period)
-
-    return BaseResponse.ok(data={"saved": saved, "period": period})
+#
+# /nasdaq/collect (수동 트리거) 엔드포인트도 철거. 나스닥 수집은 APScheduler의
+# `collect_nasdaq_bars` job(`app/infrastructure/scheduler/nasdaq_jobs.py`)이 담당.
