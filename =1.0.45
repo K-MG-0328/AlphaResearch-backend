@@ -1,6 +1,0 @@
-ERROR: Could not install packages due to an OSError: [WinError 5] 액세스가 거부되었습니다: 'C:\\Users\\superuser\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\~andas\\_libs\\algos.cp311-win_amd64.pyd'
-Consider using the `--user` option or check the permissions.
-
-
-[notice] A new release of pip available: 22.3 -> 26.0.1
-[notice] To update, run: python.exe -m pip install --upgrade pip
