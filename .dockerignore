@@ -4,9 +4,8 @@ __pycache__/
 *.py[cod]
 *.log
 .env
-mysql_data/
 redis_data/
-pgdata/
+postgres_data/
 .claude/
 .omc/
 docs/

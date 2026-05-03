@@ -10,33 +10,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
       - redis
       - postgres
     restart: always
     networks:
       - multi-agent-net
 
-  # 2. MySQL
-  mysql:
-    image: mysql:8.1
-    container_name: fastapi_mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: eddi@123
-      MYSQL_DATABASE: multi_agent_db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: eddi@123
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    networks:
-      - multi-agent-net
-
-  # 3. Redis
+  # 2. Redis
   redis:
     image: redis:8.2
     container_name: fastapi_redis
@@ -49,15 +29,15 @@ services:
     networks:
       - multi-agent-net
 
-  # 4. PostgreSQL + pgvector
+  # 3. PostgreSQL + pgvector
   postgres:
     image: pgvector/pgvector:pg17
     container_name: fastapi_postgres
     restart: always
     environment:
-      POSTGRES_USER: eddi
-      POSTGRES_PASSWORD: eddi@123
-      POSTGRES_DB: vectordb
+      POSTGRES_USER: ${POSTGRES_USER:-eddi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eddi@123}
+      POSTGRES_DB: ${POSTGRES_DB:-vectordb}
     ports:
       - "5433:5432"
     volumes:
@@ -68,7 +48,6 @@ services:
 
 # 볼륨 정의
 volumes:
-  mysql_data:
   redis_data:
   postgres_data:
 

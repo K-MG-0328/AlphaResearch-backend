@@ -22,7 +22,6 @@ ENV PYTHONPATH=/app
 EXPOSE 33333
 
 # 5. CMD 하나로 통합
-CMD ["/wait-for-it.sh", "mysql:3306", "--", \
-     "/wait-for-it.sh", "redis:6379", "--", \
+CMD ["/wait-for-it.sh", "redis:6379", "--", \
      "/wait-for-it.sh", "postgres:5432", "--", \
      "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "33333"]
