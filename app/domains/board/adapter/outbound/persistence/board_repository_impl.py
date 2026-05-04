@@ -1,51 +1,37 @@
 from datetime import datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.persistence.base_repository import BaseRepository
 from app.domains.board.application.port.out.board_repository_port import BoardRepositoryPort
 from app.domains.board.domain.entity.board import Board
 from app.domains.board.infrastructure.mapper.board_mapper import BoardMapper
 from app.domains.board.infrastructure.orm.board_orm import BoardOrm
 
 
-class BoardRepositoryImpl(BoardRepositoryPort):
+class BoardRepositoryImpl(BaseRepository[Board, BoardOrm], BoardRepositoryPort):
+    _orm_cls = BoardOrm
+
     def __init__(self, db: AsyncSession):
-        self._db = db
+        super().__init__(db)
 
-    async def find_paginated(self, page: int, size: int) -> tuple[list[Board], int]:
-        offset = (page - 1) * size
-
-        count_stmt = select(func.count()).select_from(BoardOrm)
-        count_result = await self._db.execute(count_stmt)
-        total_count = count_result.scalar_one()
-
-        stmt = (
-            select(BoardOrm)
-            .order_by(BoardOrm.created_at.desc())
-            .offset(offset)
-            .limit(size)
-        )
-        result = await self._db.execute(stmt)
-        orm_list = result.scalars().all()
-
-        return [BoardMapper.to_entity(orm) for orm in orm_list], total_count
-
-    async def find_by_id(self, board_id: int) -> Board | None:
-        stmt = select(BoardOrm).where(BoardOrm.id == board_id)
-        result = await self._db.execute(stmt)
-        orm = result.scalar_one_or_none()
-        if orm is None:
-            return None
+    def _to_entity(self, orm: BoardOrm) -> Board:
         return BoardMapper.to_entity(orm)
 
+    def _to_orm(self, entity: Board) -> BoardOrm:
+        return BoardMapper.to_orm(entity)
+
+    def _default_order_by(self):
+        return BoardOrm.created_at.desc()
+
+    async def find_paginated(self, page: int, size: int) -> tuple[list[Board], int]:
+        # 포트 시그니처 보존 — base 의 find_all(page, size) 위임
+        return await super().find_all(page, size)
+
     async def delete(self, board_id: int) -> None:
-        stmt = select(BoardOrm).where(BoardOrm.id == board_id)
-        result = await self._db.execute(stmt)
-        orm = result.scalar_one_or_none()
-        if orm is not None:
-            await self._db.delete(orm)
-            await self._db.commit()
+        # 포트는 None 반환 — base.delete_by_id 의 bool 반환값을 squash
+        await super().delete_by_id(board_id)
 
     async def update(self, board: Board) -> Board:
         stmt = select(BoardOrm).where(BoardOrm.id == board.board_id)
@@ -56,13 +42,6 @@ class BoardRepositoryImpl(BoardRepositoryPort):
         orm.title = board.title
         orm.content = board.content
         orm.updated_at = datetime.now()
-        await self._db.commit()
-        await self._db.refresh(orm)
-        return BoardMapper.to_entity(orm)
-
-    async def save(self, board: Board) -> Board:
-        orm = BoardMapper.to_orm(board)
-        self._db.add(orm)
         await self._db.commit()
         await self._db.refresh(orm)
         return BoardMapper.to_entity(orm)
