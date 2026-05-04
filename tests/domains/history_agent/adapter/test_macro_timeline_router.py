@@ -59,7 +59,9 @@ async def test_macro_timeline_returns_sorted_events(app_with_mocks):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get(
             "/api/v1/history-agent/macro-timeline",
-            params={"lookback_range": "5Y", "region": "US", "limit": 10},
+            # A5: lookback_range query parameter 는 alias `lookbackRange` (camelCase) 만 허용.
+            # snake_case `lookback_range` 는 매칭 안 되어 default 로 fallback 됨.
+            params={"lookbackRange": "5Y", "region": "US", "limit": 10},
         )
     assert response.status_code == 200
     body = response.json()
@@ -95,7 +97,7 @@ async def test_macro_timeline_cache_hit_skips_usecase(app_with_mocks):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get(
             "/api/v1/history-agent/macro-timeline",
-            params={"lookback_range": "1Y", "region": "US"},
+            params={"lookbackRange": "1Y", "region": "US"},
         )
     assert response.status_code == 200
     uc.execute.assert_not_awaited()
