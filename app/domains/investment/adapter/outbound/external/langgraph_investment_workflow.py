@@ -23,9 +23,7 @@ SOURCE_REGISTRY:
 import asyncio
 import time
 import traceback
-from datetime import datetime, timezone
-from typing import Any, Callable, Optional, TypedDict
-from urllib.parse import parse_qs, urlparse
+from typing import Any, Callable, Optional
 
 import json
 
@@ -42,6 +40,19 @@ from app.domains.investment.adapter.outbound.external.investment_signal_analyzer
 from app.domains.investment.adapter.outbound.external.investment_source_registry import (
     IMPLEMENTED_SOURCE_KEYS,
 )
+from app.domains.investment.adapter.outbound.external.langgraph_investment_helpers import (
+    confidence_label,
+    print_synthesis_result,
+)
+from app.domains.investment.adapter.outbound.external.langgraph_investment_state import (
+    MAX_ITERATIONS,
+    RETRIEVAL_TIMEOUT_SECS,
+    InvestmentAgentState,
+    _MAX_COMMENTS_PER_VIDEO,
+    _MAX_VIDEOS_FOR_COMMENTS,
+    extract_video_id,
+    parse_youtube_datetime,
+)
 from app.domains.investment.adapter.outbound.external.llm_query_parser import LLMQueryParser
 from app.domains.investment.adapter.outbound.persistence.investment_youtube_repository import (
     InvestmentYoutubeRepository,
@@ -52,62 +63,6 @@ from app.domains.market_video.adapter.outbound.external.youtube_comment_client i
 from app.domains.market_video.adapter.outbound.external.youtube_search_client import YoutubeSearchClient
 from app.domains.news.adapter.outbound.external.investment_news_collector import InvestmentNewsCollector
 from app.domains.news.adapter.outbound.persistence.investment_news_repository import InvestmentNewsRepository
-
-MAX_ITERATIONS = 10
-
-# 영상당 최대 수집 댓글 수 / 댓글을 수집할 최대 영상 수
-_MAX_COMMENTS_PER_VIDEO = 5
-_MAX_VIDEOS_FOR_COMMENTS = 3
-
-# 소스별 최대 실행 시간 (초) — 초과 시 해당 소스만 실패로 처리
-RETRIEVAL_TIMEOUT_SECS = 30
-
-
-# ──────────────────────────────────────────────
-# 공유 State 정의
-# ──────────────────────────────────────────────
-
-class InvestmentAgentState(TypedDict, total=False):
-    user_id: str
-    user_query: str
-
-    # Query Parser 결과 (Orchestrator 첫 호출 시 기록)
-    parsed_query: Optional[ParsedQuery]
-
-    # Orchestrator 제어
-    next_agent: str       # "retrieval" | "analysis" | "synthesis" | "end"
-    iteration_count: int
-    max_iterations: int
-
-    # 각 에이전트 결과
-    retrieved_data: list[dict[str, Any]]   # Retrieval Agent 결과
-    investment_decision: dict[str, Any]    # Rule 기반 투자 판단 (buy/hold/sell)
-    analysis_insights: dict[str, Any]      # Analysis Agent 결과
-    final_response: str                    # Synthesis Agent 최종 응답
-
-
-# ──────────────────────────────────────────────
-# 헬퍼 함수
-# ──────────────────────────────────────────────
-
-def _parse_youtube_datetime(dt_str: str) -> datetime | None:
-    """YouTube API published_at 문자열('2024-01-15T12:34:56Z')을 timezone-aware datetime으로 변환한다."""
-    if not dt_str:
-        return None
-    try:
-        return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return datetime.now(tz=timezone.utc)
-
-
-def _extract_video_id(video_url: str) -> str | None:
-    """YouTube URL에서 video_id를 추출한다. 파싱 실패 시 None 반환."""
-    try:
-        params = parse_qs(urlparse(video_url).query)
-        ids = params.get("v", [])
-        return ids[0] if ids else None
-    except Exception:
-        return None
 
 
 # ──────────────────────────────────────────────
@@ -387,36 +342,6 @@ class LangGraphInvestmentWorkflow(InvestmentWorkflowPort):
 
         return {"retrieved_data": retrieved_data}
 
-    @staticmethod
-    def _format_retrieval_text(retrieved_data: list[dict[str, Any]]) -> str:
-        """
-        retrieved_data 리스트를 required_data 순서 그대로 포맷팅하여 하나의 텍스트로 반환한다.
-
-        Analysis/Synthesis 노드에서 LLM 컨텍스트 조립 시 활용할 수 있다.
-        """
-        parts: list[str] = []
-        for entry in retrieved_data:
-            source = entry["source"]
-            if entry["status"] != "ok":
-                parts.append(f"[{source}] 수집 실패: {entry.get('error', '알 수 없는 오류')}")
-                continue
-            items = entry.get("items", [])
-            if not items:
-                parts.append(f"[{source}] 수집된 항목 없음")
-                continue
-            if source == "뉴스":
-                lines = [item.get("summary_text") or item.get("title", "") for item in items[:5]]
-                parts.append(f"[{source}]\n" + "\n".join(f"- {line}" for line in lines if line))
-            elif source == "유튜브":
-                lines = [
-                    f"[{item.get('channel_name', '')}] {item.get('title', '')}"
-                    for item in items[:5]
-                ]
-                parts.append(f"[{source}]\n" + "\n".join(f"- {line}" for line in lines if line))
-            else:
-                parts.append(f"[{source}] {len(items)}건 수집")
-        return "\n\n".join(parts)
-
     # ── 개별 소스 수집 헬퍼 ──────────────────────────────────────────────────
 
     async def _fetch_news(self, company: str) -> list[dict[str, Any]]:
@@ -456,8 +381,8 @@ class LangGraphInvestmentWorkflow(InvestmentWorkflowPort):
 
         items: list[dict[str, Any]] = []
         for i, video in enumerate(videos):
-            video_id = _extract_video_id(video.video_url)
-            published_at_dt = _parse_youtube_datetime(video.published_at)
+            video_id = extract_video_id(video.video_url)
+            published_at_dt = parse_youtube_datetime(video.published_at)
 
             comments: list = []
             if self._youtube_comment_client and video_id and i < _MAX_VIDEOS_FOR_COMMENTS:
@@ -798,7 +723,7 @@ rationale  : {decision['rationale']}
 
         # ── pretty-print ──────────────────────────────────────────────────────
         confidence = investment_decision.get("confidence", 0.0)
-        self._print_synthesis_result(
+        print_synthesis_result(
             verdict=verdict or "N/A (fallback)",
             confidence=confidence,
             body=final_response,
@@ -828,7 +753,7 @@ rationale  : {decision['rationale']}
         risk_factors = investment_decision.get("risk_factors", [])
 
         verdict_ko  = {"buy": "매수", "hold": "보유", "sell": "매도"}[verdict]
-        conf_label  = self._confidence_label(confidence)
+        conf_label  = confidence_label(confidence)
         is_conservative = verdict == "hold" and confidence <= 0.3
 
         print(
@@ -935,27 +860,3 @@ rationale  : {decision['rationale']}
         print(f"[SynthesisAgent] LLM fallback 응답 수신 | 길이={len(text)}자")
         return text
 
-    # ── 헬퍼 ──────────────────────────────────────────────────────────────────
-
-    @staticmethod
-    def _confidence_label(confidence: float) -> str:
-        """confidence 수치를 사람이 읽기 쉬운 확신 수준 레이블로 변환한다."""
-        if confidence >= 0.7:
-            return "높은 확신"
-        if confidence >= 0.4:
-            return "일정 수준의 가능성"
-        return "불확실성이 높은 상태"
-
-    @staticmethod
-    def _print_synthesis_result(verdict: str, confidence: float, body: str) -> None:
-        """최종 응답 요약을 콘솔에 pretty-print 한다."""
-        preview = body[:120].replace("\n", " ")
-        print(
-            f"\n[SynthesisAgent] ══ 최종 응답 ══════════════════════════════\n"
-            f"  verdict    : {verdict}\n"
-            f"  confidence : {confidence:.4f} "
-            f"({LangGraphInvestmentWorkflow._confidence_label(confidence)})\n"
-            f"  본문 미리보기: {preview}...\n"
-            f"  전체 길이  : {len(body)}자\n"
-            f"  ══════════════════════════════════════════════════════"
-        )
