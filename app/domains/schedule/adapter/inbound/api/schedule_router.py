@@ -4,56 +4,16 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.response.base_response import BaseResponse
-from app.domains.schedule.adapter.outbound.external.composite_economic_event_client import (
-    CompositeEconomicEventClient,
-)
-from app.domains.schedule.adapter.outbound.external.fred_economic_event_client import (
-    FredEconomicEventClient,
-)
-from app.domains.schedule.adapter.outbound.external.composite_investment_info_provider import (
-    CompositeInvestmentInfoProvider,
-)
-from app.domains.schedule.adapter.outbound.external.fred_investment_info_client import (
-    FredInvestmentInfoClient,
-)
-from app.domains.schedule.adapter.outbound.external.static_central_bank_event_client import (
-    StaticCentralBankEventClient,
-)
-from app.domains.schedule.adapter.outbound.external.dart_corp_earnings_client import (
-    DartCorpEarningsClient,
-)
-from app.domains.schedule.adapter.outbound.external.yahoo_investment_info_client import (
-    YahooInvestmentInfoClient,
-)
-from app.domains.schedule.adapter.outbound.external.openai_event_impact_analyzer import (
-    OpenAIEventImpactAnalyzer,
-)
-from app.domains.schedule.adapter.outbound.external.news_backed_event_disambiguator import (
-    NewsBackedEventDisambiguator,
-)
 from app.domains.schedule.adapter.outbound.messaging.notification_broadcaster import (
     get_notification_broadcaster,
 )
-from app.domains.schedule.adapter.outbound.messaging.schedule_notification_publisher_impl import (
-    ScheduleNotificationPublisher,
-)
-from app.domains.schedule.adapter.outbound.persistence.economic_event_repository_impl import (
-    EconomicEventRepositoryImpl,
-)
-from app.domains.schedule.adapter.outbound.persistence.event_impact_analysis_repository_impl import (
-    EventImpactAnalysisRepositoryImpl,
-)
-from app.domains.schedule.adapter.outbound.persistence.schedule_notification_repository_impl import (
-    ScheduleNotificationRepositoryImpl,
+from app.domains.schedule.application.request.run_event_analysis_request import (
+    RunEventAnalysisRequest,
 )
 from app.domains.schedule.application.request.search_investment_info_request import (
     SearchInvestmentInfoRequest,
-)
-from app.domains.schedule.application.request.run_event_analysis_request import (
-    RunEventAnalysisRequest,
 )
 from app.domains.schedule.application.request.sync_economic_events_request import (
     SyncEconomicEventsRequest,
@@ -91,41 +51,16 @@ from app.domains.schedule.application.usecase.search_investment_info_usecase imp
 from app.domains.schedule.application.usecase.sync_economic_events_usecase import (
     SyncEconomicEventsUseCase,
 )
-from app.domains.news.adapter.outbound.external.naver_news_client import NaverNewsClient
-from app.domains.news.adapter.outbound.external.serp_news_search_provider import (
-    SerpNewsSearchProvider,
+from app.domains.schedule.di import (
+    get_economic_events_usecase,
+    get_list_schedule_notifications_usecase,
+    get_mark_schedule_notification_read_usecase,
+    get_run_event_impact_analysis_usecase,
+    get_search_investment_info_usecase,
+    get_sync_economic_events_usecase,
 )
-from app.domains.stock.domain.value_object.market_region import MarketRegion
-from app.infrastructure.config.settings import get_settings
-from app.infrastructure.database.database import get_db
-from app.infrastructure.external.openai_responses_client import get_openai_responses_client
 
 router = APIRouter(prefix="/schedule", tags=["schedule"])
-
-
-def _build_event_disambiguator(settings) -> Optional[NewsBackedEventDisambiguator]:
-    """뉴스 검색 키가 모두 부재하면 None — UseCase 가 기존 동작으로 폴백."""
-    serp = None
-    if getattr(settings, "serp_api_key", ""):
-        serp = SerpNewsSearchProvider(
-            api_key=settings.serp_api_key,
-            market_region=MarketRegion.US_NASDAQ,
-        )
-    naver = None
-    if getattr(settings, "naver_client_id", "") and getattr(
-        settings, "naver_client_secret", ""
-    ):
-        naver = NaverNewsClient(
-            client_id=settings.naver_client_id,
-            client_secret=settings.naver_client_secret,
-        )
-    if serp is None and naver is None:
-        return None
-    return NewsBackedEventDisambiguator(
-        serp_provider=serp,
-        naver_client=naver,
-        llm_client=get_openai_responses_client(),
-    )
 
 
 @router.get("", summary="schedule 도메인 엔드포인트 안내")
@@ -160,18 +95,6 @@ async def schedule_index():
     )
 
 
-def _build_usecase() -> SearchInvestmentInfoUseCase:
-    """FRED 를 1순위로, Yahoo 를 fallback 으로 연결한 투자 정보 provider 조립."""
-    settings = get_settings()
-    provider = CompositeInvestmentInfoProvider(
-        providers=[
-            FredInvestmentInfoClient(api_key=settings.fred_api_key),
-            YahooInvestmentInfoClient(),
-        ]
-    )
-    return SearchInvestmentInfoUseCase(provider=provider)
-
-
 @router.get(
     "/investment-info",
     response_model=BaseResponse[SearchInvestmentInfoResponse],
@@ -182,6 +105,7 @@ async def get_investment_info(
         default=None,
         description="investment info types. 예: interest_rate, oil_price, exchange_rate 또는 한글 금리/유가/환율",
     ),
+    usecase: SearchInvestmentInfoUseCase = Depends(get_search_investment_info_usecase),
 ):
     """쿼리 스트링으로 복수 유형을 받아 FRED(1순위) · Yahoo(fallback) 에서 조회한다.
     미지정 시 확장된 기본 세트(금리·유가·환율·VIX·DXY·S&P500·NASDAQ100·KOSPI200·금·USD/JPY·UST 2/10/20y) 조회."""
@@ -194,7 +118,7 @@ async def get_investment_info(
     ]
     resolved_types = types if types else default_types
     request = SearchInvestmentInfoRequest(types=resolved_types)
-    result = await _build_usecase().execute(request)
+    result = await usecase.execute(request)
     return BaseResponse.ok(data=result, message="투자 정보 조회 완료")
 
 
@@ -203,9 +127,12 @@ async def get_investment_info(
     response_model=BaseResponse[SearchInvestmentInfoResponse],
     summary="투자 정보 검색 (JSON body) — FRED",
 )
-async def post_investment_info(request: SearchInvestmentInfoRequest = Body(...)):
+async def post_investment_info(
+    request: SearchInvestmentInfoRequest = Body(...),
+    usecase: SearchInvestmentInfoUseCase = Depends(get_search_investment_info_usecase),
+):
     print(f"[schedule.router] POST /schedule/investment-info types={request.types}")
-    result = await _build_usecase().execute(request)
+    result = await usecase.execute(request)
     return BaseResponse.ok(data=result, message="투자 정보 조회 완료")
 
 
@@ -221,23 +148,8 @@ async def post_investment_info(request: SearchInvestmentInfoRequest = Body(...))
 )
 async def sync_economic_events(
     request: SyncEconomicEventsRequest = Body(default_factory=SyncEconomicEventsRequest),
-    db: AsyncSession = Depends(get_db),
+    usecase: SyncEconomicEventsUseCase = Depends(get_sync_economic_events_usecase),
 ):
-    settings = get_settings()
-    fetch_port = CompositeEconomicEventClient(
-        clients=[
-            FredEconomicEventClient(api_key=settings.fred_api_key),
-            StaticCentralBankEventClient(),
-            DartCorpEarningsClient(api_key=settings.open_dart_api_key),
-        ]
-    )
-    repository = EconomicEventRepositoryImpl(db=db)
-    disambiguator = _build_event_disambiguator(settings)
-    usecase = SyncEconomicEventsUseCase(
-        fetch_port=fetch_port,
-        repository=repository,
-        disambiguator=disambiguator,
-    )
     result = await usecase.execute(request)
     return BaseResponse.ok(data=result, message="경제 일정 동기화 완료")
 
@@ -251,10 +163,8 @@ async def list_economic_events(
     year: Optional[int] = Query(default=None, description="조회 연도. 미지정 시 현재 연도"),
     country: Optional[str] = Query(default=None, description="국가 코드 (예: US)"),
     importance: Optional[str] = Query(default=None, description="HIGH / MEDIUM / LOW"),
-    db: AsyncSession = Depends(get_db),
+    usecase: GetEconomicEventsUseCase = Depends(get_economic_events_usecase),
 ):
-    repository = EconomicEventRepositoryImpl(db=db)
-    usecase = GetEconomicEventsUseCase(repository=repository)
     result = await usecase.execute(year=year, country=country, importance=importance)
     return BaseResponse.ok(data=result, message="경제 일정 조회 완료")
 
@@ -271,30 +181,8 @@ async def list_economic_events(
 )
 async def run_event_analysis(
     request: RunEventAnalysisRequest = Body(default_factory=RunEventAnalysisRequest),
-    db: AsyncSession = Depends(get_db),
+    usecase: RunEventImpactAnalysisUseCase = Depends(get_run_event_impact_analysis_usecase),
 ):
-    settings = get_settings()
-    event_repo = EconomicEventRepositoryImpl(db=db)
-    analysis_repo = EventImpactAnalysisRepositoryImpl(db=db)
-    indicator_provider = CompositeInvestmentInfoProvider(
-        providers=[
-            FredInvestmentInfoClient(api_key=settings.fred_api_key),
-            YahooInvestmentInfoClient(),
-        ]
-    )
-    analyzer = OpenAIEventImpactAnalyzer(client=get_openai_responses_client())
-    notification_publisher = ScheduleNotificationPublisher(
-        repository=ScheduleNotificationRepositoryImpl(db=db),
-        broadcaster=get_notification_broadcaster(),
-    )
-    usecase = RunEventImpactAnalysisUseCase(
-        event_repository=event_repo,
-        analysis_repository=analysis_repo,
-        indicator_provider=indicator_provider,
-        analyzer=analyzer,
-        model_name=settings.openai_learning_model,
-        notification_publisher=notification_publisher,
-    )
     result = await usecase.execute(request)
     return BaseResponse.ok(data=result, message="경제 일정 영향 분석 완료")
 
@@ -309,7 +197,7 @@ async def list_event_analysis(
     days_back: int = Query(default=14, ge=0, le=365),
     days_forward: int = Query(default=14, ge=0, le=365),
     limit: int = Query(default=20, ge=1, le=200),
-    db: AsyncSession = Depends(get_db),
+    usecase: RunEventImpactAnalysisUseCase = Depends(get_run_event_impact_analysis_usecase),
 ):
     """기준일(주말은 금요일로 시프트) 기준 경제 일정 분석 + 다가오는 7일 일정을 반환.
 
@@ -320,28 +208,6 @@ async def list_event_analysis(
     print(
         f"[schedule.router] GET /schedule/event-analysis country={country} "
         f"days_back={days_back} days_forward={days_forward} limit={limit}"
-    )
-    settings = get_settings()
-    event_repo = EconomicEventRepositoryImpl(db=db)
-    analysis_repo = EventImpactAnalysisRepositoryImpl(db=db)
-    indicator_provider = CompositeInvestmentInfoProvider(
-        providers=[
-            FredInvestmentInfoClient(api_key=settings.fred_api_key),
-            YahooInvestmentInfoClient(),
-        ]
-    )
-    analyzer = OpenAIEventImpactAnalyzer(client=get_openai_responses_client())
-    notification_publisher = ScheduleNotificationPublisher(
-        repository=ScheduleNotificationRepositoryImpl(db=db),
-        broadcaster=get_notification_broadcaster(),
-    )
-    usecase = RunEventImpactAnalysisUseCase(
-        event_repository=event_repo,
-        analysis_repository=analysis_repo,
-        indicator_provider=indicator_provider,
-        analyzer=analyzer,
-        model_name=settings.openai_learning_model,
-        notification_publisher=notification_publisher,
     )
     result = await usecase.execute(
         RunEventAnalysisRequest(
@@ -368,13 +234,11 @@ async def list_event_analysis(
 async def list_schedule_notifications(
     limit: int = Query(default=50, ge=1, le=200),
     unread_only: bool = Query(default=False, description="True 시 미확인만 반환"),
-    db: AsyncSession = Depends(get_db),
+    usecase: ListScheduleNotificationsUseCase = Depends(get_list_schedule_notifications_usecase),
 ):
     print(
         f"[schedule.router] GET /schedule/notifications limit={limit} unread_only={unread_only}"
     )
-    repo = ScheduleNotificationRepositoryImpl(db=db)
-    usecase = ListScheduleNotificationsUseCase(repository=repo)
     result = await usecase.execute(limit=limit, unread_only=unread_only)
     return BaseResponse.ok(data=result, message="알림 목록 조회 완료")
 
@@ -386,11 +250,11 @@ async def list_schedule_notifications(
 )
 async def mark_schedule_notification_read(
     notification_id: int,
-    db: AsyncSession = Depends(get_db),
+    usecase: MarkScheduleNotificationReadUseCase = Depends(
+        get_mark_schedule_notification_read_usecase,
+    ),
 ):
     print(f"[schedule.router] POST /schedule/notifications/{notification_id}/read")
-    repo = ScheduleNotificationRepositoryImpl(db=db)
-    usecase = MarkScheduleNotificationReadUseCase(repository=repo)
     result = await usecase.execute_single(notification_id)
     return BaseResponse.ok(data=result, message="알림 읽음 처리 완료")
 
@@ -401,11 +265,11 @@ async def mark_schedule_notification_read(
     summary="미확인 알림 전체 읽음 처리",
 )
 async def mark_all_schedule_notifications_read(
-    db: AsyncSession = Depends(get_db),
+    usecase: MarkScheduleNotificationReadUseCase = Depends(
+        get_mark_schedule_notification_read_usecase,
+    ),
 ):
     print("[schedule.router] POST /schedule/notifications/read-all")
-    repo = ScheduleNotificationRepositoryImpl(db=db)
-    usecase = MarkScheduleNotificationReadUseCase(repository=repo)
     result = await usecase.execute_all()
     return BaseResponse.ok(data=result, message="전체 알림 읽음 처리 완료")
 
