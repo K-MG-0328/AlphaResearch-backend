@@ -1,8 +1,9 @@
-"""
-SnsPostRepositoryImpl
-=====================
-SnsPostRepositoryPort의 SQLAlchemy AsyncSession 구현체.
-CollectedNewsRepositoryImpl 패턴 그대로 따름.
+"""SnsPostRepositoryPort 의 SQLAlchemy AsyncSession 구현체.
+
+CollectedNewsRepositoryImpl 패턴 그대로. BaseRepository 채택 (D1 확장):
+- save: BaseRepository 의 add+commit+refresh+to_entity 위임
+- 도메인 특화 메서드 (save_batch / exists_by_hash / find_by_ticker / count_by_ticker)
+  는 그대로 유지
 
 주요 차이점:
 - 중복 키: url_hash 대신 post_hash (sha256(platform + post_id))
@@ -19,6 +20,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.persistence.base_repository import BaseRepository
 from app.domains.sentiment.application.port.sns_post_repository_port import SnsPostRepositoryPort
 from app.domains.sentiment.domain.entity.sns_post import SnsPost
 from app.domains.sentiment.infrastructure.mapper.sns_post_mapper import SnsPostMapper
@@ -27,22 +29,21 @@ from app.domains.sentiment.infrastructure.orm.sns_post_orm import SnsPostOrm
 logger = logging.getLogger(__name__)
 
 
-class SnsPostRepositoryImpl(SnsPostRepositoryPort):
-    def __init__(self, db: AsyncSession):
-        self._db = db
+class SnsPostRepositoryImpl(BaseRepository[SnsPost, SnsPostOrm], SnsPostRepositoryPort):
+    _orm_cls = SnsPostOrm
 
-    async def save(self, post: SnsPost) -> SnsPost:
-        """게시물 저장. 저장 후 id가 채워진 Entity 반환."""
-        orm = SnsPostMapper.to_orm(post)
-        self._db.add(orm)
-        await self._db.commit()
-        await self._db.refresh(orm)
+    def __init__(self, db: AsyncSession):
+        super().__init__(db)
+
+    def _to_entity(self, orm: SnsPostOrm) -> SnsPost:
         return SnsPostMapper.to_entity(orm)
 
+    def _to_orm(self, entity: SnsPost) -> SnsPostOrm:
+        return SnsPostMapper.to_orm(entity)
+
     async def save_batch(self, posts: list[SnsPost]) -> int:
-        """
-        여러 건 일괄 저장.
-        post_hash 중복(IntegrityError)은 skip 처리.
+        """여러 건 일괄 저장. post_hash 중복(IntegrityError) 은 skip 처리.
+
         Returns: 실제로 저장된 개수.
         """
         saved_count = 0
@@ -76,11 +77,7 @@ class SnsPostRepositoryImpl(SnsPostRepositoryPort):
         platform: Optional[str] = None,
         limit: int = 100,
     ) -> list[SnsPost]:
-        """
-        종목 티커로 조회.
-        platform 지정 시 해당 플랫폼만 필터링.
-        최신순(collected_at desc) 정렬.
-        """
+        """종목 티커로 조회. platform 지정 시 해당 플랫폼만 필터링. 최신순 (collected_at desc)."""
         stmt = (
             select(SnsPostOrm)
             .where(SnsPostOrm.ticker == ticker)
