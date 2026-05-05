@@ -14,7 +14,6 @@
 import app.domains.account.infrastructure.orm.account_orm  # noqa: F401
 import app.domains.account.infrastructure.orm.user_watchlist_orm  # noqa: F401
 import app.domains.agent.infrastructure.orm.integrated_analysis_orm  # noqa: F401
-import app.domains.board.infrastructure.orm.board_orm  # noqa: F401
 import app.domains.dashboard.infrastructure.orm.nasdaq_bar_orm  # noqa: F401
 import app.domains.disclosure.infrastructure.orm.collection_job_item_orm  # noqa: F401
 import app.domains.disclosure.infrastructure.orm.collection_job_orm  # noqa: F401
