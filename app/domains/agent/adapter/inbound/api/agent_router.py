@@ -42,8 +42,8 @@ from app.domains.agent.application.response.integrated_analysis_response import 
 from app.domains.agent.application.usecase.analyze_finance_agent_usecase import (
     AnalyzeFinanceAgentUseCase,
 )
-from app.domains.agent.application.usecase.process_agent_query_usecase import (
-    ProcessAgentQueryUseCase,
+from app.domains.agent.application.usecase.run_agent_query_usecase import (
+    RunAgentQueryUseCase,
 )
 from app.domains.company_profile.adapter.outbound.cache.business_overview_cache import (
     RedisBusinessOverviewCache,
@@ -173,7 +173,7 @@ async def query_agent(
         asset_type_port=CachedAssetTypeAdapter(YahooFinanceAssetTypeClient(), redis),
     )
 
-    usecase = ProcessAgentQueryUseCase(
+    usecase = RunAgentQueryUseCase(
         news_agent=NewsSubAgentAdapter(db=db, api_key=settings.openai_api_key),
         disclosure_agent=DisclosureSubAgentAdapter(),
         finance_agent=FinanceSubAgentAdapter(),

@@ -1,6 +1,6 @@
 """timeline 이벤트 enrichment cache + AR 메트릭 service.
 
-`HistoryAgentUseCase` 의 `_load/_apply/_save_enrichments` 와
+`RunHistoryAgentUseCase` 의 `_load/_apply/_save_enrichments` 와
 `_apply_event_impact_metrics` 4 메서드를 응집 service 로 추출. UseCase 본체는 thin
 wrapper 로 호출 → 외부 호출자(테스트 포함) 영향 0.
 

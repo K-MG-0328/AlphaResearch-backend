@@ -9,7 +9,7 @@ from app.domains.agent.application.response.frontend_agent_response import (
 )
 
 
-class RequestFinanceAnalysisUseCase:
+class RunFinanceAnalysisUseCase:
     def __init__(self, analysis_request_client: AnalysisRequestClient):
         self._analysis_request_client = analysis_request_client
 

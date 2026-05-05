@@ -3,7 +3,7 @@
 import datetime
 
 from app.domains.history_agent.application.response.timeline_response import TimelineEvent
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
     _announcement_source_rank,
     _dedupe_announcements,
     _jaccard_similarity,

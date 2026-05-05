@@ -61,7 +61,7 @@ from app.domains.history_agent.application.usecase.generate_titles_usecase impor
 from app.domains.history_agent.application.usecase.get_anomaly_causality_usecase import (
     GetAnomalyCausalityUseCase,
 )
-from app.domains.history_agent.application.usecase.history_agent_usecase import HistoryAgentUseCase
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import RunHistoryAgentUseCase
 from app.infrastructure.cache.redis_client import get_redis
 from app.infrastructure.database.database import get_db
 
@@ -127,10 +127,10 @@ def _macro_news_search_port() -> GdeltMacroNewsAdapter:
     return GdeltMacroNewsAdapter(GdeltClient())
 
 
-def get_history_agent_usecase(
+def get_run_history_agent_usecase(
     db: AsyncSession = Depends(get_db),
     redis: aioredis.Redis = Depends(get_redis),
-) -> HistoryAgentUseCase:
+) -> RunHistoryAgentUseCase:
     # A-3: asset_type 은 Redis+프로세스 로컬로 장기 캐시(24h) 감싸서 재호출 비용 제거.
     cached_asset_type_port = CachedAssetTypeAdapter(_asset_type_port(), redis)
     enrichment_repo = EventEnrichmentRepositoryImpl(db)
@@ -141,7 +141,7 @@ def get_history_agent_usecase(
         gpr_index_port=_gpr_index_port(),
         enrichment_repo=enrichment_repo,
     )
-    return HistoryAgentUseCase(
+    return RunHistoryAgentUseCase(
         stock_bars_port=_stock_bars_port(),
         yfinance_corporate_port=_yfinance_corporate_port(),
         dart_corporate_client=_dart_corporate_client(),

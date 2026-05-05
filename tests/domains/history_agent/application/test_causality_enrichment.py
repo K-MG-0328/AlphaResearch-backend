@@ -12,7 +12,7 @@ from app.domains.history_agent.application.response.timeline_response import (
     HypothesisResult,
     TimelineEvent,
 )
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
     _MAX_CAUSALITY_EVENTS,
     _enrich_causality,
 )
@@ -45,7 +45,7 @@ async def test_surge_event_gets_causality():
     timeline = [_make_event("SURGE")]
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._run_causality",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._run_causality",
         new_callable=AsyncMock,
         return_value=[HypothesisResult(**h) for h in _MOCK_HYPOTHESES],
     ):
@@ -62,7 +62,7 @@ async def test_plunge_event_gets_causality():
     timeline = [_make_event("PLUNGE")]
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._run_causality",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._run_causality",
         new_callable=AsyncMock,
         return_value=[HypothesisResult(**h) for h in _MOCK_HYPOTHESES],
     ):
@@ -79,7 +79,7 @@ async def test_non_trigger_events_skip_causality():
     timeline = [_make_event(t, days_ago=i + 1) for i, t in enumerate(non_trigger_types)]
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._run_causality",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._run_causality",
         new_callable=AsyncMock,
     ) as mock_run:
         await _enrich_causality("AAPL", timeline)
@@ -105,7 +105,7 @@ async def test_max_causality_events_cap():
         return [HypothesisResult(**h) for h in _MOCK_HYPOTHESES]
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._run_causality",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._run_causality",
         side_effect=mock_run,
     ):
         await _enrich_causality("AAPL", timeline)
@@ -123,7 +123,7 @@ async def test_causality_failure_leaves_field_none():
     timeline = [_make_event("SURGE")]
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._run_causality",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._run_causality",
         new_callable=AsyncMock,
         side_effect=Exception("Anthropic API 오류"),
     ):
@@ -145,7 +145,7 @@ async def test_partial_failure_does_not_block_other_events():
         return results.pop(0)
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._run_causality",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._run_causality",
         side_effect=mock_run,
     ):
         await _enrich_causality("AAPL", timeline)

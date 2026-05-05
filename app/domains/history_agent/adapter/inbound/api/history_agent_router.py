@@ -43,7 +43,7 @@ from app.domains.history_agent.application.usecase.generate_titles_usecase impor
 from app.domains.history_agent.application.usecase.get_anomaly_causality_usecase import (
     GetAnomalyCausalityUseCase,
 )
-from app.domains.history_agent.application.usecase.history_agent_usecase import HistoryAgentUseCase
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import RunHistoryAgentUseCase
 from app.domains.dashboard.adapter.outbound.external.yahoo_finance_stock_client import (
     YahooFinanceStockClient,
 )
@@ -53,7 +53,7 @@ from app.domains.history_agent.di import (
     get_collect_important_macro_events_usecase,
     get_fred_macro_port,
     get_generate_titles_usecase,
-    get_history_agent_usecase,
+    get_run_history_agent_usecase,
 )
 from app.infrastructure.cache.redis_client import get_redis
 from app.infrastructure.config.settings import get_settings
@@ -97,7 +97,7 @@ async def get_timeline(
     chart_interval: str = Query("1Y", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Q (1Y는 1Q로 자동 정규화)"),
     enrich_titles: bool = Query(True, description="LLM 타이틀 생성 여부. False면 rule-based 타이틀만 반환"),
     db: AsyncSession = Depends(get_db),
-    usecase: HistoryAgentUseCase = Depends(get_history_agent_usecase),
+    usecase: RunHistoryAgentUseCase = Depends(get_run_history_agent_usecase),
 ):
     """CORPORATE·ANNOUNCEMENT·NEWS·MACRO 이벤트 타임라인을 반환합니다.
 
@@ -131,7 +131,7 @@ async def stream_timeline(
     chart_interval: str = Query("1Y", alias="chartInterval", description="봉 단위: 1D | 1W | 1M | 1Q (1Y는 1Q로 자동 정규화)"),
     enrich_titles: bool = Query(True, description="LLM 타이틀 생성 여부. False면 rule-based 타이틀만 반환"),
     db: AsyncSession = Depends(get_db),
-    usecase: HistoryAgentUseCase = Depends(get_history_agent_usecase),
+    usecase: RunHistoryAgentUseCase = Depends(get_run_history_agent_usecase),
 ):
     """타임라인 데이터를 SSE로 스트리밍합니다. progress / done / error 이벤트를 순서대로 전송합니다.
 

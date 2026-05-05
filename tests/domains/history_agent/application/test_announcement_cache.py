@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.domains.history_agent.application.response.timeline_response import TimelineEvent
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
     _enrich_announcement_details,
     _announcement_summary_cache_key,
 )
@@ -71,7 +71,7 @@ async def test_full_cache_hit_skips_llm():
     )
     summarize_mock = AsyncMock()
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._summarize_to_korean",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._summarize_to_korean",
         new=summarize_mock,
     ):
         await _enrich_announcement_details(events, redis=redis_mock)
@@ -100,7 +100,7 @@ async def test_partial_cache_only_misses_to_llm():
 
     summarize_mock = AsyncMock(return_value="마이크로소프트 60B 자사주 매입")
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._summarize_to_korean",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._summarize_to_korean",
         new=summarize_mock,
     ):
         await _enrich_announcement_details(events, redis=redis_mock)
@@ -117,7 +117,7 @@ async def test_no_redis_falls_back_to_llm():
     events = [_make_announcement(_LONG_ENGLISH_DETAIL)]
     summarize_mock = AsyncMock(return_value="애플 칩 공급 계약 35B")
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._summarize_to_korean",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._summarize_to_korean",
         new=summarize_mock,
     ):
         await _enrich_announcement_details(events, redis=None)
@@ -133,7 +133,7 @@ async def test_korean_detail_skipped():
     redis_mock = AsyncMock()
     summarize_mock = AsyncMock()
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase._summarize_to_korean",
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase._summarize_to_korean",
         new=summarize_mock,
     ):
         await _enrich_announcement_details(events, redis=redis_mock)
