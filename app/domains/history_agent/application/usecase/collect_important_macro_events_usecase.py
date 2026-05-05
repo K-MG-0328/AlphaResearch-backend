@@ -265,7 +265,7 @@ class CollectImportantMacroEventsUseCase:
                 await self._ranker.score(timeline)
             except Exception as exc:  # noqa: BLE001
                 # 랭커 실패(DB 스키마 이슈 포함) 시에도 타임라인 자체는 돌려준다.
-                # 세션 aborted 상태는 호출부(HistoryAgentUseCase)에서 rollback 처리.
+                # 세션 aborted 상태는 호출부(RunHistoryAgentUseCase)에서 rollback 처리.
                 logger.warning(
                     "[CollectMacro] ranker.score 실패 — 중립값(0.5)로 대체: error_type=%s error=%s",
                     type(exc).__name__, exc,

@@ -1,12 +1,12 @@
-"""PR3 — HistoryAgentUseCase._apply_event_impact_metrics 동작 검증."""
+"""PR3 — RunHistoryAgentUseCase._apply_event_impact_metrics 동작 검증."""
 import asyncio
 from datetime import date
 from typing import List
 from unittest.mock import MagicMock
 
 from app.domains.history_agent.application.response.timeline_response import TimelineEvent
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
-    HistoryAgentUseCase,
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
+    RunHistoryAgentUseCase,
 )
 from app.domains.history_agent.domain.entity.event_enrichment import compute_detail_hash
 from app.domains.stock.market_data.application.port.out.event_impact_metric_repository_port import (
@@ -28,9 +28,9 @@ class _StubImpactRepo(EventImpactMetricRepositoryPort):
         return list(self._metrics)
 
 
-def _make_usecase(impact_repo) -> HistoryAgentUseCase:
+def _make_usecase(impact_repo) -> RunHistoryAgentUseCase:
     # 필수 의존성은 MagicMock — _apply_event_impact_metrics 외 다른 메서드 호출 안 함.
-    return HistoryAgentUseCase(
+    return RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),
@@ -78,7 +78,7 @@ def _metric(
 
 
 def test_no_op_when_repo_is_none():
-    usecase = HistoryAgentUseCase(
+    usecase = RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),

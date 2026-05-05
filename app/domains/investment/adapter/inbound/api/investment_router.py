@@ -13,8 +13,8 @@ from app.domains.investment.application.request.investment_decision_request impo
 from app.domains.investment.application.response.investment_decision_response import (
     InvestmentDecisionResponse,
 )
-from app.domains.investment.application.usecase.investment_decision_usecase import (
-    InvestmentDecisionUseCase,
+from app.domains.investment.application.usecase.run_investment_decision_usecase import (
+    RunInvestmentDecisionUseCase,
 )
 from app.infrastructure.cache.redis_client import get_redis
 from app.infrastructure.config.settings import get_settings
@@ -69,7 +69,7 @@ async def investment_decision(
         youtube_api_key=settings.youtube_api_key,
         db_session=db,
     )
-    usecase = InvestmentDecisionUseCase(workflow=workflow)
+    usecase = RunInvestmentDecisionUseCase(workflow=workflow)
     result = await usecase.execute(user_id=user_id, request=body)
 
     return BaseResponse.ok(data=result, message="투자 판단 참고 응답이 생성되었습니다.")

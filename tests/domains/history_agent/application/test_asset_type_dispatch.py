@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
-    HistoryAgentUseCase,
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
+    RunHistoryAgentUseCase,
 )
 
 
@@ -21,7 +21,7 @@ def _make_usecase_with_quote_type(quote_type: str, redis_get_return=None):
     repo.find_by_keys = AsyncMock(return_value=[])
     repo.upsert_bulk = AsyncMock(return_value=0)
 
-    return HistoryAgentUseCase(
+    return RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),
@@ -34,10 +34,10 @@ def _make_usecase_with_quote_type(quote_type: str, redis_get_return=None):
 
 
 def test_build_cache_key_includes_asset_type_and_version():
-    assert HistoryAgentUseCase._build_cache_key("EQUITY", "AAPL", "1Y", True) == (
+    assert RunHistoryAgentUseCase._build_cache_key("EQUITY", "AAPL", "1Y", True) == (
         "history_agent:v8:EQUITY:AAPL:1Y"
     )
-    assert HistoryAgentUseCase._build_cache_key("INDEX", "^IXIC", "1M", False) == (
+    assert RunHistoryAgentUseCase._build_cache_key("INDEX", "^IXIC", "1M", False) == (
         "history_agent:v8:INDEX:^IXIC:1M:no-titles"
     )
 
@@ -62,7 +62,7 @@ async def test_etf_dispatches_to_etf_path_without_causality():
     """ETF는 중요 MACRO 경로로 수집되며 is_etf=True. §13.4 C: PRICE 제거 / 2026-04 NEWS 제거."""
     usecase, redis_mock = _make_usecase_with_quote_type("ETF")
 
-    _module = "app.domains.history_agent.application.usecase.history_agent_usecase"
+    _module = "app.domains.history_agent.application.usecase.run_history_agent_usecase"
     with patch.object(usecase, "_collect_important_macro_events", AsyncMock(return_value=[])), \
          patch(f"{_module}.enrich_macro_titles", new_callable=AsyncMock), \
          patch(f"{_module}.enrich_other_titles", new_callable=AsyncMock), \

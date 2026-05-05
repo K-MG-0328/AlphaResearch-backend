@@ -11,8 +11,8 @@ from app.domains.dashboard.application.response.announcement_response import (
 from app.domains.dashboard.application.response.corporate_event_response import (
     CorporateEventsResponse,
 )
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
-    HistoryAgentUseCase,
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
+    RunHistoryAgentUseCase,
 )
 from app.domains.history_agent.domain.entity.event_enrichment import compute_detail_hash
 
@@ -49,7 +49,7 @@ async def test_collect_holdings_events_tags_constituent_and_weight():
     repo.find_by_keys = AsyncMock(return_value=[])
     repo.upsert_bulk = AsyncMock(return_value=0)
 
-    usecase = HistoryAgentUseCase(
+    usecase = RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),
@@ -61,7 +61,7 @@ async def test_collect_holdings_events_tags_constituent_and_weight():
         etf_holdings_port=holdings_port,
     )
 
-    _module = "app.domains.history_agent.application.usecase.history_agent_usecase"
+    _module = "app.domains.history_agent.application.usecase.run_history_agent_usecase"
     corp_resp = CorporateEventsResponse(ticker="AAPL", chart_interval="1M", count=0, events=[])
     ann_resp = AnnouncementsResponse(ticker="AAPL", chart_interval="1M", count=0, events=[])
 

@@ -470,7 +470,7 @@ async def _enrich_causality(ticker: str, timeline: List[TimelineEvent], is_index
     logger.info("[HistoryAgent] ✦ 인과관계 분석 완료: %d/%d 성공", success, len(targets))
 
 
-class HistoryAgentUseCase:
+class RunHistoryAgentUseCase:
 
     def __init__(
         self,

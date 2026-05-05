@@ -8,7 +8,7 @@ DISCLAIMER = (
 )
 
 
-class InvestmentDecisionUseCase:
+class RunInvestmentDecisionUseCase:
     def __init__(self, workflow: InvestmentWorkflowPort) -> None:
         self._workflow = workflow
 

@@ -44,7 +44,7 @@ _SIGNAL_SCORE = {
 }
 
 
-class ProcessAgentQueryUseCase:
+class RunAgentQueryUseCase:
     def __init__(
         self,
         news_agent: NewsAgentPort,

@@ -2,7 +2,7 @@
 
 DART/SEC EDGAR 가 같은 날 유사 공시를 발행할 때 병합 + ETF holding 이벤트와
 ETF 자체 이벤트의 (date, category, title) 중복 제거. 모두 stateless 함수라
-history_agent_usecase.py 의 본체 클래스 의존이 없다. 동작 변경 0.
+run_history_agent_usecase.py 의 본체 클래스 의존이 없다. 동작 변경 0.
 """
 
 import logging

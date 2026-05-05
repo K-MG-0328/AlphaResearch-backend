@@ -16,8 +16,8 @@ from app.domains.history_agent.application.service.title_generation_service impo
     FALLBACK_TITLE as _FALLBACK_TITLE,
     is_fallback_title as _is_fallback_title,
 )
-from app.domains.history_agent.application.usecase.history_agent_usecase import (
-    HistoryAgentUseCase,
+from app.domains.history_agent.application.usecase.run_history_agent_usecase import (
+    RunHistoryAgentUseCase,
 )
 from app.domains.history_agent.domain.entity.event_enrichment import (
     EventEnrichment,
@@ -54,11 +54,11 @@ def _make_enrichment(event: TimelineEvent, title: str, causality=None) -> EventE
     )
 
 
-def _make_usecase(enrichment_repo) -> HistoryAgentUseCase:
+def _make_usecase(enrichment_repo) -> RunHistoryAgentUseCase:
     redis_mock = AsyncMock()
     redis_mock.get = AsyncMock(return_value=None)
     redis_mock.setex = AsyncMock()
-    return HistoryAgentUseCase(
+    return RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),
@@ -167,7 +167,7 @@ async def test_no_llm_call_when_all_events_in_db():
     assert new_events == []
 
     with patch(
-        "app.domains.history_agent.application.usecase.history_agent_usecase.get_workflow_llm"
+        "app.domains.history_agent.application.usecase.run_history_agent_usecase.get_workflow_llm"
     ) as mock_llm:
         await usecase._save_enrichments(_TICKER, new_events)
         mock_llm.assert_not_called()
@@ -230,7 +230,7 @@ async def test_no_llm_title_call_when_enrich_titles_false():
     asset_type_mock = AsyncMock()
     asset_type_mock.get_quote_type = AsyncMock(return_value="EQUITY")
 
-    usecase = HistoryAgentUseCase(
+    usecase = RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),
@@ -241,7 +241,7 @@ async def test_no_llm_title_call_when_enrich_titles_false():
         asset_type_port=asset_type_mock,
     )
 
-    _module = "app.domains.history_agent.application.usecase.history_agent_usecase"
+    _module = "app.domains.history_agent.application.usecase.run_history_agent_usecase"
 
     # §13.4 C: PRICE 카테고리 제거. price_titles·GetPriceEventsUseCase 참조 제거.
     corp_response = CorporateEventsResponse(ticker=_TICKER, chart_interval="1M", count=0, events=[])
@@ -276,7 +276,7 @@ async def test_redis_cache_hit_skips_db_query():
     asset_type_mock = AsyncMock()
     asset_type_mock.get_quote_type = AsyncMock(return_value="EQUITY")
 
-    usecase = HistoryAgentUseCase(
+    usecase = RunHistoryAgentUseCase(
         stock_bars_port=MagicMock(),
         yfinance_corporate_port=MagicMock(),
         dart_corporate_client=MagicMock(),

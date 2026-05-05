@@ -1,7 +1,7 @@
 """History Agent UseCase 의 lookback 윈도우 + region 매핑 helper.
 
 봉 단위(`chart_interval`) 와 조회 기간(`period`) 매핑 + 지수/ETF 의 FRED 매크로
-리전 매핑. 모두 stateless 데이터/순수 함수라 history_agent_usecase.py 의 본체
+리전 매핑. 모두 stateless 데이터/순수 함수라 run_history_agent_usecase.py 의 본체
 클래스 의존이 없다. 동작 변경 0.
 """
 
