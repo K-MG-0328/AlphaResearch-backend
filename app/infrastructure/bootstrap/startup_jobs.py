@@ -166,23 +166,10 @@ async def _run_corp_earnings_bootstrap() -> None:
         )
 
 
-def _init_kiwi() -> None:
-    """Kiwi 형태소 분석기 미리 초기화 (첫 요청 타임아웃 방지)."""
-    try:
-        from app.domains.market_analysis.adapter.outbound.persistence.market_context_repository_impl import (
-            _get_kiwi,
-        )
-
-        _get_kiwi()
-        logger.info("[Startup] Kiwi 초기화 완료")
-    except Exception as e:
-        logger.warning("[Startup] Kiwi 초기화 실패 (계속 진행): %s", e)
-
-
 async def run_all_bootstraps() -> None:
     """lifespan 의 yield 직전까지 실행되는 부트스트랩 전체.
 
-    순서 의존: DB → seed → disclosure → market data → macro → corp earnings → Kiwi.
+    순서 의존: DB → seed → disclosure → market data → macro → corp earnings.
     각 단계 내부의 catch-up 작업은 try/except 로 graceful (실패해도 서버 부팅 계속).
     """
     await _init_database()
@@ -191,7 +178,6 @@ async def run_all_bootstraps() -> None:
     await _run_market_data_bootstrap()
     await _run_macro_snapshot_bootstrap()
     await _run_corp_earnings_bootstrap()
-    _init_kiwi()
 
 
 def start_scheduler():
