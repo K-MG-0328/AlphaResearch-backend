@@ -1,5 +1,5 @@
-from app.domains.kakao_auth.application.port.out.kakao_user_info_port import KakaoUserInfoPort
-from app.domains.kakao_auth.application.response.kakao_user_info_response import KakaoUserInfoResponse
+from app.domains.auth.application.port.out.kakao_user_info_port import KakaoUserInfoPort
+from app.domains.auth.application.response.kakao_user_info_response import KakaoUserInfoResponse
 
 
 class GetKakaoUserInfoUseCase:

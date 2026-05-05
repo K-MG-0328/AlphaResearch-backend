@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.domains.kakao_auth.domain.entity.kakao_user_info import KakaoUserInfo
+from app.domains.auth.domain.entity.kakao_user_info import KakaoUserInfo
 
 
 class KakaoUserInfoPort(ABC):

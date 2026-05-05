@@ -1,7 +1,7 @@
 import httpx
 
-from app.domains.kakao_auth.application.port.out.kakao_token_port import KakaoTokenPort
-from app.domains.kakao_auth.domain.entity.kakao_token import KakaoToken
+from app.domains.auth.application.port.out.kakao_token_port import KakaoTokenPort
+from app.domains.auth.domain.entity.kakao_token import KakaoToken
 
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 

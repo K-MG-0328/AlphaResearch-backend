@@ -1,4 +1,4 @@
-from app.domains.kakao_auth.domain.value_object.kakao_oauth_url import KakaoOAuthUrl
+from app.domains.auth.domain.value_object.kakao_oauth_url import KakaoOAuthUrl
 
 
 class GenerateKakaoOAuthUrlUseCase:

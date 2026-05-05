@@ -3,8 +3,8 @@ from typing import Optional
 
 import redis.asyncio as aioredis
 
-from app.domains.kakao_auth.application.port.out.temp_token_store_port import TempTokenStorePort
-from app.domains.kakao_auth.domain.entity.temp_token import TempToken
+from app.domains.auth.application.port.out.temp_token_store_port import TempTokenStorePort
+from app.domains.auth.domain.entity.temp_token import TempToken
 
 TEMP_TOKEN_KEY_PREFIX = "temp_token:"
 
