@@ -105,8 +105,8 @@ class GetAnomalyCausalityUseCase:
                 cached=True,
             )
 
-        from app.domains.causality_agent.application.causality_agent_workflow import (
-            run_causality_agent,
+        from app.domains.causality_agent.application.usecase.run_causality_agent_usecase import (
+            RunCausalityAgentUseCase,
         )
 
         settings = get_settings()
@@ -122,7 +122,7 @@ class GetAnomalyCausalityUseCase:
             )
 
         try:
-            state = await run_causality_agent(
+            state = await RunCausalityAgentUseCase().execute(
                 ticker=ticker,
                 start_date=start_date,
                 end_date=end_date,
