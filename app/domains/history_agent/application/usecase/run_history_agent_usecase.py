@@ -314,13 +314,15 @@ from app.domains.history_agent.application.usecase._lookback_window import (  # 
 
 
 async def _run_causality(ticker: str, event: TimelineEvent) -> List[HypothesisResult]:
-    from app.domains.causality_agent.application.causality_agent_workflow import run_causality_agent
+    from app.domains.causality_agent.application.usecase.run_causality_agent_usecase import (
+        RunCausalityAgentUseCase,
+    )
 
     pre_days, post_days = _causality_window_days()
     start_date = event.date - timedelta(days=pre_days)
     end_date = event.date + timedelta(days=post_days)
     try:
-        state = await run_causality_agent(
+        state = await RunCausalityAgentUseCase().execute(
             ticker=ticker,
             start_date=start_date,
             end_date=end_date,
