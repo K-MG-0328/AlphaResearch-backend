@@ -27,6 +27,9 @@ import app.domains.investment.infrastructure.orm.investment_news_content_orm  # 
 import app.domains.investment.infrastructure.orm.investment_youtube_log_orm  # noqa: F401
 import app.domains.investment.infrastructure.orm.investment_youtube_video_comment_orm  # noqa: F401
 import app.domains.investment.infrastructure.orm.investment_youtube_video_orm  # noqa: F401
+import app.domains.market_video.infrastructure.orm.collected_video_orm  # noqa: F401
+import app.domains.market_video.infrastructure.orm.saved_youtube_video_orm  # noqa: F401
+import app.domains.market_video.infrastructure.orm.video_comment_orm  # noqa: F401
 import app.domains.news.infrastructure.orm.article_content_orm  # noqa: F401
 import app.domains.news.infrastructure.orm.collected_news_orm  # noqa: F401
 import app.domains.news.infrastructure.orm.investment_news_orm  # noqa: F401
@@ -34,6 +37,7 @@ import app.domains.news.infrastructure.orm.saved_article_orm  # noqa: F401
 import app.domains.news.infrastructure.orm.user_saved_article_orm  # noqa: F401
 import app.domains.post.infrastructure.orm.post_orm  # noqa: F401
 import app.domains.schedule.infrastructure.orm.economic_event_orm  # noqa: F401
+import app.domains.sentiment.infrastructure.orm.sns_post_orm  # noqa: F401
 import app.domains.smart_money.infrastructure.orm.global_portfolio_orm  # noqa: F401
 import app.domains.smart_money.infrastructure.orm.investor_flow_orm  # noqa: F401
 import app.domains.smart_money.infrastructure.orm.kr_portfolio_orm  # noqa: F401
