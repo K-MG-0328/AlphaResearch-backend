@@ -3,6 +3,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from app.common.response.base_agent_response import BaseAgentResponse
+
 
 class HypothesisSource(BaseModel):
     label: str                              # "Reuters", "DART", "Bloomberg"
@@ -62,7 +64,7 @@ class TimelineEvent(BaseModel):
     reason_evidence: Optional[str] = None
 
 
-class TimelineResponse(BaseModel):
+class TimelineResponse(BaseAgentResponse):
     # 매크로 전용 타임라인은 ticker 없이 region 기반으로도 반환된다.
     ticker: Optional[str] = None
     # ADR-0001: /timeline 은 chart_interval(봉 단위), /macro-timeline 은 lookback_range(조회 기간).

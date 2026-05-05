@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from app.common.response.base_agent_response import BaseAgentResponse
 
 
-class InvestmentDecisionResponse(BaseModel):
+class InvestmentDecisionResponse(BaseAgentResponse):
     query: str
     final_response: str
     disclaimer: str
