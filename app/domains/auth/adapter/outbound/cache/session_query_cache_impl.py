@@ -2,7 +2,7 @@ from typing import Optional
 
 import redis.asyncio as aioredis
 
-from app.domains.authentication.application.port.out.session_query_port import SessionQueryPort
+from app.domains.auth.application.port.out.session_query_port import SessionQueryPort
 
 SESSION_KEY_PREFIX = "session:"
 

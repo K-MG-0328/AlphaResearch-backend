@@ -3,7 +3,7 @@ from typing import Optional
 
 import redis.asyncio as aioredis
 
-from app.domains.authentication.application.port.out.temp_token_query_port import TempTokenQueryPort
+from app.domains.auth.application.port.out.temp_token_query_port import TempTokenQueryPort
 
 TEMP_TOKEN_KEY_PREFIX = "temp_token:"
 

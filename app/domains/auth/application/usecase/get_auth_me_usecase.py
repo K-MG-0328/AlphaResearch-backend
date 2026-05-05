@@ -1,8 +1,8 @@
 from app.common.exception.app_exception import AppException
-from app.domains.authentication.application.port.out.account_info_query_port import AccountInfoQueryPort
-from app.domains.authentication.application.port.out.session_query_port import SessionQueryPort
-from app.domains.authentication.application.port.out.temp_token_query_port import TempTokenQueryPort
-from app.domains.authentication.application.response.auth_me_response import AuthMeResponse, AuthUser
+from app.domains.auth.application.port.out.account_info_query_port import AccountInfoQueryPort
+from app.domains.auth.application.port.out.session_query_port import SessionQueryPort
+from app.domains.auth.application.port.out.temp_token_query_port import TempTokenQueryPort
+from app.domains.auth.application.response.auth_me_response import AuthMeResponse, AuthUser
 
 
 class GetAuthMeUseCase:
