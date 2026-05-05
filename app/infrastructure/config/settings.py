@@ -5,6 +5,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    port: int = 33333
+
     postgres_user: str
     postgres_password: str
     postgres_host: str
