@@ -14,7 +14,6 @@ from app.domains.auth.adapter.inbound.api.auth_router import router as auth_rout
 from app.domains.kakao_auth.adapter.inbound.api.kakao_auth_router import router as kakao_auth_router
 from app.domains.api_schema.adapter.inbound.api.api_schema_router import router as api_schema_router
 from app.domains.news.adapter.inbound.api.news_router import router as news_router
-from app.domains.board.adapter.inbound.api.board_router import router as board_router
 from app.domains.market_video.adapter.inbound.api.market_video_router import router as market_video_router
 from app.domains.post.adapter.inbound.api.post_router import router as post_router
 from app.domains.disclosure.adapter.inbound.api.disclosure_router import router as disclosure_router
@@ -37,7 +36,6 @@ from app.domains.sentiment.adapter.inbound.api.sentiment_router import router as
 api_v1_router = APIRouter(prefix="/api/v1")
 
 # --- 도메인 라우터 등록 ---
-api_v1_router.include_router(board_router)      # BOARD: /api/v1/board/...
 api_v1_router.include_router(market_video_router)  # MARKET VIDEO: /api/v1/youtube/...
 api_v1_router.include_router(post_router)       # POST: /api/v1/post/...
 api_v1_router.include_router(stock_router)      # STOCK: /api/v1/stock/...
