@@ -10,15 +10,15 @@ from app.common.exception.app_exception import AppException
 from app.domains.account.adapter.outbound.cache.account_token_cache_impl import AccountTokenCacheImpl
 from app.domains.account.adapter.outbound.persistence.account_repository_impl import AccountRepositoryImpl
 from app.domains.account.application.usecase.find_account_by_email_usecase import FindAccountByEmailUseCase
-from app.domains.kakao_auth.adapter.outbound.cache.temp_token_store import TempTokenStore
-from app.domains.kakao_auth.adapter.outbound.external.kakao_token_client import KakaoTokenClient
-from app.domains.kakao_auth.adapter.outbound.external.kakao_user_info_client import KakaoUserInfoClient
-from app.domains.kakao_auth.application.usecase.generate_kakao_oauth_url_usecase import (
+from app.domains.auth.adapter.outbound.cache.temp_token_store import TempTokenStore
+from app.domains.auth.adapter.outbound.external.kakao_token_client import KakaoTokenClient
+from app.domains.auth.adapter.outbound.external.kakao_user_info_client import KakaoUserInfoClient
+from app.domains.auth.application.usecase.generate_kakao_oauth_url_usecase import (
     GenerateKakaoOAuthUrlUseCase,
 )
-from app.domains.kakao_auth.application.usecase.get_kakao_user_info_usecase import GetKakaoUserInfoUseCase
-from app.domains.kakao_auth.application.usecase.issue_temp_token_usecase import IssueTempTokenUseCase
-from app.domains.kakao_auth.application.usecase.request_kakao_access_token_usecase import (
+from app.domains.auth.application.usecase.get_kakao_user_info_usecase import GetKakaoUserInfoUseCase
+from app.domains.auth.application.usecase.issue_temp_token_usecase import IssueTempTokenUseCase
+from app.domains.auth.application.usecase.request_kakao_access_token_usecase import (
     RequestKakaoAccessTokenUseCase,
 )
 from app.infrastructure.cache.redis_client import get_redis

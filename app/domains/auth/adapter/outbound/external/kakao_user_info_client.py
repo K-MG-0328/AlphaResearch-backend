@@ -1,7 +1,7 @@
 import httpx
 
-from app.domains.kakao_auth.application.port.out.kakao_user_info_port import KakaoUserInfoPort
-from app.domains.kakao_auth.domain.entity.kakao_user_info import KakaoUserInfo
+from app.domains.auth.application.port.out.kakao_user_info_port import KakaoUserInfoPort
+from app.domains.auth.domain.entity.kakao_user_info import KakaoUserInfo
 
 KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me"
 

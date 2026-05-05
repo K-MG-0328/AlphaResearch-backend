@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.domains.kakao_auth.domain.entity.kakao_token import KakaoToken
+from app.domains.auth.domain.entity.kakao_token import KakaoToken
 
 
 class KakaoTokenPort(ABC):

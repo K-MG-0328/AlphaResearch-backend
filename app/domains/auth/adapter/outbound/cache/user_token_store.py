@@ -1,6 +1,6 @@
 import redis.asyncio as aioredis
 
-from app.domains.kakao_auth.application.port.out.user_token_store_port import UserTokenStorePort
+from app.domains.auth.application.port.out.user_token_store_port import UserTokenStorePort
 
 SESSION_KEY_PREFIX = "session:"
 

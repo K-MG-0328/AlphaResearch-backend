@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from app.domains.kakao_auth.domain.entity.temp_token import TempToken
+from app.domains.auth.domain.entity.temp_token import TempToken
 
 
 class TempTokenStorePort(ABC):

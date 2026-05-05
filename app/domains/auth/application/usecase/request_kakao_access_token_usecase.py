@@ -1,5 +1,5 @@
-from app.domains.kakao_auth.application.port.out.kakao_token_port import KakaoTokenPort
-from app.domains.kakao_auth.application.response.kakao_token_response import KakaoTokenResponse
+from app.domains.auth.application.port.out.kakao_token_port import KakaoTokenPort
+from app.domains.auth.application.response.kakao_token_response import KakaoTokenResponse
 
 
 class RequestKakaoAccessTokenUseCase:

@@ -1,6 +1,6 @@
 import uuid
 
-from app.domains.kakao_auth.application.port.out.user_token_store_port import UserTokenStorePort
+from app.domains.auth.application.port.out.user_token_store_port import UserTokenStorePort
 
 
 class IssueUserTokenUseCase:

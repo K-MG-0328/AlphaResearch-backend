@@ -3,7 +3,7 @@ from typing import Optional
 import redis.asyncio as aioredis
 
 from app.domains.account.application.port.out.temp_token_port import TempTokenPort, TempTokenInfo
-from app.domains.kakao_auth.adapter.outbound.cache.temp_token_store import TempTokenStore
+from app.domains.auth.adapter.outbound.cache.temp_token_store import TempTokenStore
 
 
 class TempTokenAdapter(TempTokenPort):

@@ -11,7 +11,7 @@ from app.domains.account.adapter.inbound.api.account_router import router as acc
 from app.domains.account.adapter.inbound.api.users_router import router as users_router
 from app.domains.agent.adapter.inbound.api.agent_router import router as agent_router
 from app.domains.auth.adapter.inbound.api.auth_router import router as auth_router
-from app.domains.kakao_auth.adapter.inbound.api.kakao_auth_router import router as kakao_auth_router
+from app.domains.auth.adapter.inbound.api.kakao_auth_router import router as kakao_auth_router
 from app.domains.api_schema.adapter.inbound.api.api_schema_router import router as api_schema_router
 from app.domains.news.adapter.inbound.api.news_router import router as news_router
 from app.domains.post.adapter.inbound.api.post_router import router as post_router
