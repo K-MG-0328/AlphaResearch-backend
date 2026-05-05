@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.account.infrastructure.orm.account_orm import AccountOrm
-from app.domains.authentication.application.port.out.account_info_query_port import AccountInfo, AccountInfoQueryPort
+from app.domains.auth.application.port.out.account_info_query_port import AccountInfo, AccountInfoQueryPort
 
 
 class AccountInfoQueryImpl(AccountInfoQueryPort):

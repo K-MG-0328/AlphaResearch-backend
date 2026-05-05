@@ -27,7 +27,7 @@ from app.infrastructure.database.database import get_db
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/kakao-authentication", tags=["kakao-auth"])
+router = APIRouter(prefix="/auth/kakao", tags=["kakao-auth"])
 
 settings = get_settings()
 

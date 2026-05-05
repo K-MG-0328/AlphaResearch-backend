@@ -11,9 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.adapter.inbound.api.v1_router import api_v1_router
 from app.common.exception.global_exception_handler import register_exception_handlers
-from app.domains.authentication.adapter.inbound.api.authentication_router import (
-    router as authentication_router,
-)
 from app.infrastructure.bootstrap import orm_imports  # noqa: F401
 from app.infrastructure.bootstrap.startup_jobs import run_all_bootstraps, start_scheduler
 from app.infrastructure.config.langsmith_config import configure_langsmith
@@ -47,7 +44,6 @@ app.add_middleware(
 )
 
 app.include_router(api_v1_router)
-app.include_router(authentication_router)
 register_exception_handlers(app)
 
 

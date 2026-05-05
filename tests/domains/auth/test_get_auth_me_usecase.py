@@ -11,15 +11,15 @@ from typing import Optional
 import pytest
 
 from app.common.exception.app_exception import AppException
-from app.domains.authentication.application.port.out.account_info_query_port import (
+from app.domains.auth.application.port.out.account_info_query_port import (
     AccountInfo,
     AccountInfoQueryPort,
 )
-from app.domains.authentication.application.port.out.session_query_port import SessionQueryPort
-from app.domains.authentication.application.port.out.temp_token_query_port import (
+from app.domains.auth.application.port.out.session_query_port import SessionQueryPort
+from app.domains.auth.application.port.out.temp_token_query_port import (
     TempTokenQueryPort,
 )
-from app.domains.authentication.application.usecase.get_auth_me_usecase import GetAuthMeUseCase
+from app.domains.auth.application.usecase.get_auth_me_usecase import GetAuthMeUseCase
 
 pytestmark = pytest.mark.asyncio
 
