@@ -54,9 +54,11 @@ def _empty_news_metrics() -> NewsSignalMetrics:
 class InvestmentSignalAnalyzer(InvestmentSignalPort):
     """ChatOpenAI 기반 투자 심리 지표 산출 구현체."""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini") -> None:
+    def __init__(self, api_key: str, model: Optional[str] = None) -> None:
+        from app.infrastructure.config.settings import get_settings
+        resolved_model = model or get_settings().llm_model_small
         # temperature=0 — 결정론적 분류 결과를 위해 고정
-        self._llm = ChatOpenAI(api_key=api_key, model=model, temperature=0)
+        self._llm = ChatOpenAI(api_key=api_key, model=resolved_model, temperature=0)
 
     # ── 유튜브 댓글 감성 분석 ────────────────────────────────────────────────
 

@@ -50,6 +50,12 @@ class Settings(BaseSettings):
 
     analysis_api_finance_url: Optional[str] = None
     analysis_api_timeout_seconds: float = 10.0
+    # 4개 에이전트 도메인 (agent / history_agent / causality_agent / investment)이
+    # 공유하는 LLM 모델 슬롯. 하드코딩 분산 방지 (Phase H1).
+    # standard: 일반 분석/합성 (default gpt-5-mini, 정확도 우선)
+    # small:    빠른 응답 우선 task (default gpt-4o-mini, latency↓)
+    llm_model_standard: str = "gpt-5-mini"
+    llm_model_small: str = "gpt-4o-mini"
     openai_finance_agent_model: str = "gpt-5-mini"
     openai_learning_model: str = "gpt-5-mini"
     openai_embedding_model: str = "text-embedding-3-small"

@@ -58,8 +58,10 @@ class InvestmentDecisionAnalyzer(InvestmentDecisionPort):
     deterministic rule → LLM rationale 순서로 동작한다.
     """
 
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini") -> None:
-        self._llm = ChatOpenAI(api_key=api_key, model=model, temperature=0)
+    def __init__(self, api_key: str, model: Optional[str] = None) -> None:
+        from app.infrastructure.config.settings import get_settings
+        resolved_model = model or get_settings().llm_model_small
+        self._llm = ChatOpenAI(api_key=api_key, model=resolved_model, temperature=0)
 
     # ── 공개 메서드 ───────────────────────────────────────────────────────────
 

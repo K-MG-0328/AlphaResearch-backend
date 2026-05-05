@@ -20,7 +20,6 @@ from app.infrastructure.langgraph.llm_factory import get_workflow_llm
 logger = logging.getLogger(__name__)
 
 _MAX_TOOL_ROUNDS = 8
-_MODEL = "gpt-5-mini"
 
 # KR6 — 탐지 유형별 프롬프트는 `causality_prompt_builder.build_hypotheses_system_prompt`
 # 가 동적 빌드. 단일 inline _SYSTEM_PROMPT 는 PromptBuilder 모듈로 이전됨.
@@ -111,7 +110,7 @@ async def generate_hypotheses(state: CausalityAgentState) -> Dict[str, Any]:
     tool_call_log: List[str] = []
 
     tools = make_langchain_tools(state)
-    llm = get_workflow_llm(model=_MODEL).bind_tools(tools)
+    llm = get_workflow_llm().bind_tools(tools)
     tool_map = {t.name: t for t in tools}
 
     detection_type = state.get("detection_type") or "single_bar"

@@ -17,16 +17,19 @@ from app.infrastructure.langgraph.llm_factory import get_workflow_llm
 
 logger = logging.getLogger(__name__)
 
-TITLE_MODEL = "gpt-5-mini"  # backward-compat constant — settings 로 override 권장
-
-
 def _settings():
     return get_settings()
 
 
 def _title_model() -> str:
-    """런타임 모델 결정. settings.history_title_llm_model 가 우선."""
-    return _settings().history_title_llm_model or TITLE_MODEL
+    """런타임 모델 결정. settings.history_title_llm_model 가 우선, fallback 은 표준 슬롯."""
+    s = _settings()
+    return s.history_title_llm_model or s.llm_model_standard
+
+
+# 다른 history_agent 서비스/usecase 가 이 모듈에서 가져다 쓰는 backward-compat alias.
+# import 시점에 한 번 settings 를 조회 (Phase H1 — 하드코딩 상수 제거).
+TITLE_MODEL = _title_model()
 
 
 # 배치/동시성은 런타임에 get_settings()로 읽는다.

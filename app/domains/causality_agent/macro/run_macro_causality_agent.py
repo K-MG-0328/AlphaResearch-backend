@@ -23,7 +23,6 @@ from app.infrastructure.langgraph.llm_factory import get_workflow_llm
 
 logger = logging.getLogger(__name__)
 
-_MODEL = "gpt-5-mini"
 _MACRO_WINDOW_DAYS = 14
 
 _MACRO_CAUSALITY_SYSTEM = """\
@@ -70,7 +69,7 @@ async def run_macro_causality_agent(
 ) -> List[HypothesisResult]:
     context = _event_context(event, timeline)
     try:
-        llm = get_workflow_llm(model=_MODEL)
+        llm = get_workflow_llm()
         response = await llm.ainvoke([
             SystemMessage(content=_MACRO_CAUSALITY_SYSTEM),
             HumanMessage(content=f"지수: {ticker}\n\n{context}"),
