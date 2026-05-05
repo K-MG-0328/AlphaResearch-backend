@@ -12,10 +12,9 @@ from app.domains.agent.application.service.synthesis_prompt_builder import build
 from app.domains.company_profile.domain.value_object.business_overview import (
     BusinessOverview,
 )
+from app.infrastructure.config.settings import get_settings
 
 logger = logging.getLogger(__name__)
-
-_SYNTHESIS_MODEL = "gpt-5-mini"
 
 _SYSTEM_PROMPT = """당신은 주식 종합 분석 전문가입니다.
 뉴스·공시·재무 에이전트의 분석 결과를 교차 검증하여 투자자에게 실질적으로 유용한 심층 의견을 제공하세요.
@@ -51,8 +50,9 @@ def _format_overview_block(
 
 
 class OpenAISynthesisClient(LlmSynthesisPort):
-    def __init__(self, api_key: str, model: str = _SYNTHESIS_MODEL) -> None:
-        llm = ChatOpenAI(model=model, api_key=api_key, temperature=0.3)
+    def __init__(self, api_key: str, model: Optional[str] = None) -> None:
+        resolved_model = model or get_settings().llm_model_standard
+        llm = ChatOpenAI(model=resolved_model, api_key=api_key, temperature=0.3)
         prompt = ChatPromptTemplate.from_messages([
             ("system", _SYSTEM_PROMPT),
             ("human", "{context}"),

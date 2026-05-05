@@ -82,16 +82,18 @@ class LangGraphInvestmentWorkflow(InvestmentWorkflowPort):
         serp_api_key: str = "",
         youtube_api_key: str = "",
         db_session: Optional[AsyncSession] = None,
-        query_parser_model: str = "gpt-5-mini",
+        query_parser_model: Optional[str] = None,
         max_iterations: int = MAX_ITERATIONS,
     ) -> None:
-        self._query_parser = LLMQueryParser(api_key=api_key, model=query_parser_model)
+        from app.infrastructure.config.settings import get_settings
+        resolved_model = query_parser_model or get_settings().llm_model_standard
+        self._query_parser = LLMQueryParser(api_key=api_key, model=resolved_model)
         self._max_iterations = max_iterations
         self._news_collector = InvestmentNewsCollector(serp_api_key=serp_api_key) if serp_api_key else None
         self._youtube_client = YoutubeSearchClient(api_key=youtube_api_key) if youtube_api_key else None
         self._youtube_comment_client = YoutubeCommentClient(api_key=youtube_api_key) if youtube_api_key else None
         self._db_session = db_session
-        self._llm = ChatOpenAI(api_key=api_key, model=query_parser_model, temperature=0.3)
+        self._llm = ChatOpenAI(api_key=api_key, model=resolved_model, temperature=0.3)
 
         # 소스 핸들러 레지스트리: required_data 키 → async callable(company: str) → list[dict]
         # 새 소스 추가 시 이 dict에만 등록하면 병렬 실행 프레임워크가 자동 적용된다.
