@@ -5,9 +5,7 @@ from typing import Any, Dict, List
 
 import yfinance as yf
 
-from app.domains.causality_agent.adapter.outbound.external.fred_economic_client import (
-    FredEconomicClient,
-)
+from app.domains.causality_agent.di import get_economic_series_port
 from app.domains.causality_agent.domain.state.causality_agent_state import CausalityAgentState
 from app.infrastructure.config.settings import get_settings
 from app.infrastructure.external.yahoo_ticker import normalize_yfinance_ticker
@@ -87,7 +85,7 @@ async def gather_situation(state: CausalityAgentState) -> Dict[str, Any]:
         ohlcv_task = loop.run_in_executor(
             None, _fetch_ohlcv_sync, ticker, start_date.isoformat(), end_date.isoformat()
         )
-    fred_task = FredEconomicClient().fetch_series(start_date, end_date)
+    fred_task = get_economic_series_port().fetch_series(start_date, end_date)
 
     ohlcv_result, fred_result = await asyncio.gather(
         ohlcv_task, fred_task, return_exceptions=True

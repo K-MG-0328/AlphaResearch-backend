@@ -54,8 +54,9 @@ async def test_kr_ticker_takes_dart_path(monkeypatch):
     ]
     dart_client_mock = MagicMock()
     dart_client_mock.fetch_announcements = AsyncMock(return_value=fake_announcements)
+    # Phase K3 — DI 팩토리를 통한 주입 패턴 검증.
     monkeypatch.setattr(
-        "app.domains.causality_agent.adapter.outbound.external.dart_announcement_client.DartAnnouncementClient",
+        "app.domains.causality_agent.di.get_dart_announcement_port",
         lambda: dart_client_mock,
     )
 
@@ -80,7 +81,7 @@ async def test_kr_ticker_unmapped_returns_empty(monkeypatch):
     dart_client_mock = MagicMock()
     dart_client_mock.fetch_announcements = AsyncMock()
     monkeypatch.setattr(
-        "app.domains.causality_agent.adapter.outbound.external.dart_announcement_client.DartAnnouncementClient",
+        "app.domains.causality_agent.di.get_dart_announcement_port",
         lambda: dart_client_mock,
     )
 
@@ -101,7 +102,7 @@ async def test_kr_ticker_dart_failure_returns_empty(monkeypatch):
     dart_client_mock = MagicMock()
     dart_client_mock.fetch_announcements = AsyncMock(side_effect=RuntimeError("DART down"))
     monkeypatch.setattr(
-        "app.domains.causality_agent.adapter.outbound.external.dart_announcement_client.DartAnnouncementClient",
+        "app.domains.causality_agent.di.get_dart_announcement_port",
         lambda: dart_client_mock,
     )
 
