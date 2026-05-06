@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.domains.api_schema.domain.entity.api_endpoint import ApiEndpoint
+from app.domains.agent.domain.entity.api_endpoint import ApiEndpoint
 
 
 class EndpointCollector(ABC):

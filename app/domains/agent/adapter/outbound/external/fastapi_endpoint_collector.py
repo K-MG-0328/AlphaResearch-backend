@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from app.domains.api_schema.application.port.endpoint_collector import EndpointCollector
-from app.domains.api_schema.domain.entity.api_endpoint import ApiEndpoint, ParameterInfo
+from app.domains.agent.application.port.endpoint_collector import EndpointCollector
+from app.domains.agent.domain.entity.api_endpoint import ApiEndpoint, ParameterInfo
 
 
 class FastApiEndpointCollector(EndpointCollector):
