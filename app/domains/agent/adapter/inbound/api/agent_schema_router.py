@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Request
 
-from app.domains.api_schema.adapter.outbound.external.fastapi_endpoint_collector import (
+from app.domains.agent.adapter.outbound.external.fastapi_endpoint_collector import (
     FastApiEndpointCollector,
 )
-from app.domains.api_schema.application.response.agent_schema_response import (
+from app.domains.agent.application.response.agent_schema_response import (
     AgentSchemaResponse,
 )
-from app.domains.api_schema.application.usecase.generate_agent_schema_usecase import (
+from app.domains.agent.application.usecase.generate_agent_schema_usecase import (
     GenerateAgentSchemaUseCase,
 )
 

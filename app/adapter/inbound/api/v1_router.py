@@ -16,7 +16,7 @@ from app.domains.account.adapter.inbound.api.users_router import router as users
 from app.domains.agent.adapter.inbound.api.agent_router import router as agent_router
 from app.domains.history_agent.adapter.inbound.api.history_agent_router import router as history_agent_router
 from app.domains.investment.adapter.inbound.api.investment_router import router as investment_router
-from app.domains.api_schema.adapter.inbound.api.api_schema_router import router as api_schema_router
+from app.domains.agent.adapter.inbound.api.agent_schema_router import router as agent_schema_router
 
 # Market data — Dashboard / Stock / Macro / Smart Money / Schedule
 from app.domains.dashboard.adapter.inbound.api.dashboard_router import router as dashboard_router
@@ -51,7 +51,7 @@ api_v1_router.include_router(users_router)           # /api/v1/users/me/watchlis
 api_v1_router.include_router(agent_router)           # /api/v1/agent/...           (require_user_or_temp)
 api_v1_router.include_router(history_agent_router)   # /api/v1/history-agent/...   (public)
 api_v1_router.include_router(investment_router)      # /api/v1/investment/...      (require_user)
-api_v1_router.include_router(api_schema_router)      # /api/v1/agent-schema
+api_v1_router.include_router(agent_schema_router)    # /api/v1/agent-schema
 
 # --- Market data ---
 api_v1_router.include_router(dashboard_router)       # /api/v1/dashboard/...

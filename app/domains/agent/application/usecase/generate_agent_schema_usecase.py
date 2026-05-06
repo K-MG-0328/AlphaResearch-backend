@@ -1,5 +1,5 @@
-from app.domains.api_schema.application.port.endpoint_collector import EndpointCollector
-from app.domains.api_schema.application.response.agent_schema_response import (
+from app.domains.agent.application.port.endpoint_collector import EndpointCollector
+from app.domains.agent.application.response.agent_schema_response import (
     AgentSchemaResponse,
     AgentToolResponse,
 )
