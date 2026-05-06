@@ -63,10 +63,12 @@ async def test_korean_ticker_routes_to_naver_and_gdelt(monkeypatch):
     FinnhubFake = _make_recording_client("FinnhubFake")
     YahooFake = _make_recording_client("YahooFake")
 
-    monkeypatch.setattr(m, "NaverKoreanNewsClient", NaverFake)
-    monkeypatch.setattr(m, "GdeltClient", GdeltFake)
-    monkeypatch.setattr(m, "FinnhubNewsClient", FinnhubFake)
-    monkeypatch.setattr(m, "YahooFinanceNewsClient", YahooFake)
+    # Phase K3 — DI 팩토리를 통한 주입 패턴 검증.
+    # 노드 모듈이 import-time 에 함수를 바인딩하므로 노드 모듈의 이름을 직접 patch.
+    monkeypatch.setattr(m, "get_naver_korean_news_port", lambda: NaverFake())
+    monkeypatch.setattr(m, "get_gdelt_news_port", lambda: GdeltFake())
+    monkeypatch.setattr(m, "get_finnhub_news_port", lambda: FinnhubFake())
+    monkeypatch.setattr(m, "get_yahoo_finance_news_port", lambda: YahooFake())
 
     result = await m._collect_news("005930.KS", date(2026, 4, 1), date(2026, 4, 30))
 
@@ -96,10 +98,12 @@ async def test_korean_ticker_falls_back_to_code_when_name_unknown(monkeypatch):
     FinnhubFake = _make_recording_client("FinnhubFake")
     YahooFake = _make_recording_client("YahooFake")
 
-    monkeypatch.setattr(m, "NaverKoreanNewsClient", NaverFake)
-    monkeypatch.setattr(m, "GdeltClient", GdeltFake)
-    monkeypatch.setattr(m, "FinnhubNewsClient", FinnhubFake)
-    monkeypatch.setattr(m, "YahooFinanceNewsClient", YahooFake)
+    # Phase K3 — DI 팩토리를 통한 주입 패턴 검증.
+    # 노드 모듈이 import-time 에 함수를 바인딩하므로 노드 모듈의 이름을 직접 patch.
+    monkeypatch.setattr(m, "get_naver_korean_news_port", lambda: NaverFake())
+    monkeypatch.setattr(m, "get_gdelt_news_port", lambda: GdeltFake())
+    monkeypatch.setattr(m, "get_finnhub_news_port", lambda: FinnhubFake())
+    monkeypatch.setattr(m, "get_yahoo_finance_news_port", lambda: YahooFake())
 
     await m._collect_news("999999", date(2026, 4, 1), date(2026, 4, 30))
 
@@ -122,10 +126,12 @@ async def test_us_equity_keeps_existing_finnhub_gdelt_path(monkeypatch):
     )
     YahooFake = _make_recording_client("YahooFake")
 
-    monkeypatch.setattr(m, "NaverKoreanNewsClient", NaverFake)
-    monkeypatch.setattr(m, "GdeltClient", GdeltFake)
-    monkeypatch.setattr(m, "FinnhubNewsClient", FinnhubFake)
-    monkeypatch.setattr(m, "YahooFinanceNewsClient", YahooFake)
+    # Phase K3 — DI 팩토리를 통한 주입 패턴 검증.
+    # 노드 모듈이 import-time 에 함수를 바인딩하므로 노드 모듈의 이름을 직접 patch.
+    monkeypatch.setattr(m, "get_naver_korean_news_port", lambda: NaverFake())
+    monkeypatch.setattr(m, "get_gdelt_news_port", lambda: GdeltFake())
+    monkeypatch.setattr(m, "get_finnhub_news_port", lambda: FinnhubFake())
+    monkeypatch.setattr(m, "get_yahoo_finance_news_port", lambda: YahooFake())
 
     result = await m._collect_news("AAPL", date(2026, 4, 1), date(2026, 4, 30))
 
@@ -148,10 +154,12 @@ async def test_index_ticker_keeps_existing_path(monkeypatch):
     FinnhubFake = _make_recording_client("FinnhubFake")
     YahooFake = _make_recording_client("YahooFake")
 
-    monkeypatch.setattr(m, "NaverKoreanNewsClient", NaverFake)
-    monkeypatch.setattr(m, "GdeltClient", GdeltFake)
-    monkeypatch.setattr(m, "FinnhubNewsClient", FinnhubFake)
-    monkeypatch.setattr(m, "YahooFinanceNewsClient", YahooFake)
+    # Phase K3 — DI 팩토리를 통한 주입 패턴 검증.
+    # 노드 모듈이 import-time 에 함수를 바인딩하므로 노드 모듈의 이름을 직접 patch.
+    monkeypatch.setattr(m, "get_naver_korean_news_port", lambda: NaverFake())
+    monkeypatch.setattr(m, "get_gdelt_news_port", lambda: GdeltFake())
+    monkeypatch.setattr(m, "get_finnhub_news_port", lambda: FinnhubFake())
+    monkeypatch.setattr(m, "get_yahoo_finance_news_port", lambda: YahooFake())
 
     await m._collect_news("^IXIC", date(2026, 4, 1), date(2026, 4, 30))
 

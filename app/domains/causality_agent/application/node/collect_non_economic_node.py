@@ -2,25 +2,16 @@ import asyncio
 import logging
 from typing import Any, Dict, List
 
-from app.domains.causality_agent.adapter.outbound.external.finnhub_news_client import (
-    FinnhubNewsClient,
-)
-from app.domains.causality_agent.adapter.outbound.external.gdelt_client import GdeltClient
-from app.domains.causality_agent.adapter.outbound.external.gpr_index_client import GprIndexClient
-from app.domains.causality_agent.adapter.outbound.external.market_benchmark_client import (
-    MarketBenchmarkClient,
-)
-from app.domains.causality_agent.adapter.outbound.external.naver_korean_news_client import (
-    NaverKoreanNewsClient,
-)
-from app.domains.causality_agent.adapter.outbound.external.related_assets_client import (
-    RelatedAssetsClient,
-)
-from app.domains.causality_agent.adapter.outbound.external.sector_benchmark_client import (
-    SectorBenchmarkClient,
-)
-from app.domains.causality_agent.adapter.outbound.external.yahoo_finance_news_client import (
-    YahooFinanceNewsClient,
+from app.domains.causality_agent.di import (
+    get_finnhub_analyst_rating_port,
+    get_finnhub_news_port,
+    get_gdelt_news_port,
+    get_gpr_index_port,
+    get_market_benchmark_port,
+    get_naver_korean_news_port,
+    get_related_assets_port,
+    get_sector_benchmark_port,
+    get_yahoo_finance_news_port,
 )
 from app.domains.causality_agent.domain.state.causality_agent_state import CausalityAgentState
 # SEC EDGAR client는 dashboard 도메인에 위치 (history_agent 도 같은 패턴으로 재사용 중).
@@ -79,14 +70,14 @@ async def _collect_news(ticker: str, start_date, end_date) -> List[Dict[str, Any
         )
         finnhub_result: Any = []
         gdelt_result = await asyncio.gather(
-            GdeltClient().fetch_articles(gdelt_keyword, start_date, end_date),
+            get_gdelt_news_port().fetch_articles(gdelt_keyword, start_date, end_date),
             return_exceptions=True,
         )
         gdelt_result = gdelt_result[0]
     else:
         finnhub_result, gdelt_result = await asyncio.gather(
-            FinnhubNewsClient().fetch_articles(ticker, start_date, end_date),
-            GdeltClient().fetch_articles(gdelt_keyword, start_date, end_date),
+            get_finnhub_news_port().fetch_articles(ticker, start_date, end_date),
+            get_gdelt_news_port().fetch_articles(gdelt_keyword, start_date, end_date),
             return_exceptions=True,
         )
 
@@ -110,7 +101,7 @@ async def _collect_news(ticker: str, start_date, end_date) -> List[Dict[str, Any
     if not articles:
         logger.info("[CausalityAgent] Finnhub/GDELT 모두 0건 → yfinance fallback")
         try:
-            yf_articles = await YahooFinanceNewsClient().fetch_articles(
+            yf_articles = await get_yahoo_finance_news_port().fetch_articles(
                 ticker, start_date, end_date
             )
             articles.extend(yf_articles)
@@ -136,8 +127,8 @@ async def _collect_news_korean(ticker: str, start_date, end_date) -> List[Dict[s
     )
 
     naver_result, gdelt_result = await asyncio.gather(
-        NaverKoreanNewsClient().fetch_articles(ticker, start_date, end_date),
-        GdeltClient().fetch_articles(gdelt_keyword, start_date, end_date),
+        get_naver_korean_news_port().fetch_articles(ticker, start_date, end_date),
+        get_gdelt_news_port().fetch_articles(gdelt_keyword, start_date, end_date),
         return_exceptions=True,
     )
 
@@ -201,9 +192,7 @@ async def _collect_sec_announcements(ticker: str, start_date, end_date) -> List[
 
 async def _collect_dart_announcements(ticker: str, start_date, end_date) -> List[Dict[str, Any]]:
     """DART list.json — 한국 종목. corp_code 매핑 실패 시 빈 배열 (graceful)."""
-    from app.domains.causality_agent.adapter.outbound.external.dart_announcement_client import (
-        DartAnnouncementClient,
-    )
+    from app.domains.causality_agent.di import get_dart_announcement_port
     from app.infrastructure.cache.redis_client import redis_client
     from app.infrastructure.external.corp_code_mapper import ticker_to_corp_code
 
@@ -216,7 +205,7 @@ async def _collect_dart_announcements(ticker: str, start_date, end_date) -> List
         return []
 
     try:
-        return await DartAnnouncementClient().fetch_announcements(
+        return await get_dart_announcement_port().fetch_announcements(
             ticker=ticker, corp_code=corp_code,
             start_date=start_date, end_date=end_date,
         )
@@ -231,7 +220,7 @@ async def _collect_analyst_recommendations(ticker: str) -> List[Dict[str, Any]]:
     if region.is_korea() or _is_index_ticker(ticker):
         return []
     try:
-        raw = await FinnhubNewsClient().get_recommendation_trend(ticker)
+        raw = await get_finnhub_analyst_rating_port().get_recommendation_trend(ticker)
     except Exception as exc:
         logger.warning("[CausalityAgent] Finnhub recommendation 예외: %s", exc)
         return []
@@ -265,13 +254,13 @@ async def collect_non_economic(state: CausalityAgentState) -> Dict[str, Any]:
     logger.info(
         "[CausalityAgent] [2/3] 연관자산 + 뉴스 + GPR + 공시 + 분석가 추천 + 시장/섹터 벤치마크 수집 시작"
     )
-    related_task = RelatedAssetsClient().fetch(start_date, end_date)
+    related_task = get_related_assets_port().fetch(start_date, end_date)
     news_task = _collect_news(ticker, start_date, end_date)
-    gpr_task = GprIndexClient().fetch(start_date, end_date)
+    gpr_task = get_gpr_index_port().fetch(start_date, end_date)
     announcements_task = _collect_announcements(ticker, start_date, end_date)
     rec_task = _collect_analyst_recommendations(ticker)
-    benchmark_task = MarketBenchmarkClient().fetch(ticker, start_date, end_date)
-    sector_task = SectorBenchmarkClient().fetch(ticker, start_date, end_date)
+    benchmark_task = get_market_benchmark_port().fetch(ticker, start_date, end_date)
+    sector_task = get_sector_benchmark_port().fetch(ticker, start_date, end_date)
 
     (
         related_result,
