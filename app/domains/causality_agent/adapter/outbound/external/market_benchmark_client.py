@@ -16,6 +16,9 @@ from typing import Any, Dict, Optional
 
 import yfinance as yf
 
+from app.domains.causality_agent.application.port.out.benchmark_ports import (
+    MarketBenchmarkPort,
+)
 from app.domains.stock.domain.service.market_region_resolver import MarketRegionResolver
 
 logger = logging.getLogger(__name__)
@@ -28,7 +31,7 @@ def _resolve_benchmark(ticker: str) -> tuple[str, str]:
     return "^GSPC", "S&P 500"
 
 
-class MarketBenchmarkClient:
+class MarketBenchmarkClient(MarketBenchmarkPort):
     """ticker → region → 시장 인덱스 OHLCV(close) 시계열."""
 
     async def fetch(

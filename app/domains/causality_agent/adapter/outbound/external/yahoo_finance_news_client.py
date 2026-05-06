@@ -5,6 +5,10 @@ from typing import Any, Dict, List
 
 import yfinance as yf
 
+from app.domains.causality_agent.application.port.out.news_ports import (
+    NewsArticlesPort,
+)
+
 logger = logging.getLogger(__name__)
 
 _MAX_RECORDS = 50
@@ -49,11 +53,11 @@ def _extract_publish_dt(item: Dict[str, Any]) -> datetime | None:
     return None
 
 
-class YahooFinanceNewsClient:
+class YahooFinanceNewsClient(NewsArticlesPort):
     """yfinance `.news` 기반 fallback 뉴스 소스.
 
     Yahoo Finance 뉴스 피드는 날짜 범위 검색이 없어 최신 N건만 반환된다.
-    클라이언트 측에서 날짜 필터링한다.
+    클라이언트 측에서 날짜 필터링한다. NewsArticlesPort 구현 — query=symbol.
     """
 
     async def fetch_articles(

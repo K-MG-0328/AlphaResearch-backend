@@ -6,6 +6,10 @@ from typing import Any, Dict, List
 
 import httpx
 
+from app.domains.causality_agent.application.port.out.news_ports import (
+    NewsArticlesPort,
+)
+
 logger = logging.getLogger(__name__)
 
 _DOC_API = "https://api.gdeltproject.org/api/v2/doc/doc"
@@ -18,10 +22,11 @@ _semaphore = asyncio.Semaphore(1)
 _last_request_ts: float = 0.0
 
 
-class GdeltClient:
+class GdeltClient(NewsArticlesPort):
     """GDELT Doc 2.0 API 클라이언트 (키워드 + 날짜 범위).
 
     429/타임아웃 시 즉시 빈 배열을 반환한다 (보조 소스이므로 fast-fail).
+    NewsArticlesPort 구현 — query 인자에 GDELT 검색 키워드를 전달.
     """
 
     async def fetch_articles(
@@ -31,7 +36,7 @@ class GdeltClient:
         end_date: date,
     ) -> List[Dict[str, Any]]:
         params = {
-            "query": keyword,
+            "keyword": keyword,
             "mode": "ArtList",
             "maxrecords": _MAX_RECORDS,
             "startdatetime": start_date.strftime("%Y%m%d%H%M%S"),

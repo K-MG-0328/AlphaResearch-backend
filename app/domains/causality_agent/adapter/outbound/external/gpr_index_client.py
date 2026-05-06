@@ -5,6 +5,10 @@ from typing import Any, Dict, List
 
 import httpx
 
+from app.domains.causality_agent.application.port.out.economic_ports import (
+    GprIndexPort,
+)
+
 logger = logging.getLogger(__name__)
 
 # Caldara & Iacoviello GPR Index — monthly CSV (publicly available)
@@ -12,7 +16,7 @@ _GPR_CSV_URL = "https://www.matteoiacoviello.com/gpr_files/data_gpr_export.xls"
 _GPR_CSV_FALLBACK = "https://www.matteoiacoviello.com/gpr_files/data_gpr_export.xlsx"
 
 
-class GprIndexClient:
+class GprIndexClient(GprIndexPort):
     """GPR(Geopolitical Risk) Index CSV/XLS 다운로드 + 날짜 범위 필터."""
 
     async def fetch(

@@ -14,6 +14,9 @@ import logging
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
+from app.domains.causality_agent.application.port.out.disclosure_ports import (
+    DartAnnouncementPort,
+)
 from app.domains.dashboard.domain.entity.announcement_event import AnnouncementEventType
 from app.domains.disclosure.adapter.outbound.external.dart_disclosure_api_client import (
     DartDisclosureApiClient,
@@ -96,7 +99,7 @@ def _build_dart_url(rcept_no: str) -> str:
     return f"https://dart.fss.or.kr/dsaf001/main.do?rceptNo={rcept_no}"
 
 
-class DartAnnouncementClient:
+class DartAnnouncementClient(DartAnnouncementPort):
     """DART 공시 → causality_agent state 의 announcements dict 변환."""
 
     def __init__(self, dart_client: Optional[DartDisclosureApiClient] = None):
