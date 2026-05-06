@@ -13,6 +13,9 @@ from typing import Any, Dict, List
 
 import httpx
 
+from app.domains.causality_agent.application.port.out.news_ports import (
+    NewsArticlesPort,
+)
 from app.infrastructure.config.settings import get_settings
 from app.infrastructure.external.korean_company_directory import lookup_korean_name
 
@@ -25,8 +28,11 @@ _MAX_PAGES = 3  # 100건 × 3페이지 = 최대 300건 스캔 후 범위 필터
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 
-class NaverKoreanNewsClient:
-    """한국 종목 ticker → 한글 회사명 키워드 → Naver 검색 + pubDate 범위 필터."""
+class NaverKoreanNewsClient(NewsArticlesPort):
+    """한국 종목 ticker → 한글 회사명 키워드 → Naver 검색 + pubDate 범위 필터.
+
+    NewsArticlesPort 구현 — query 인자에 종목 ticker 를 전달 (한글 회사명으로 변환됨).
+    """
 
     def __init__(self) -> None:
         settings = get_settings()

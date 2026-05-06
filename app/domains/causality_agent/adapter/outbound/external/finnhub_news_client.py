@@ -4,6 +4,10 @@ from typing import Any, Dict, List
 
 import httpx
 
+from app.domains.causality_agent.application.port.out.news_ports import (
+    AnalystRatingPort,
+    NewsArticlesPort,
+)
 from app.infrastructure.config.settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -15,10 +19,11 @@ _TIMEOUT_SECONDS = 10.0
 _MAX_RECORDS = 100
 
 
-class FinnhubNewsClient:
-    """Finnhub company-news API 클라이언트.
+class FinnhubNewsClient(NewsArticlesPort, AnalystRatingPort):
+    """Finnhub company-news + 애널리스트 rating + 실적 서프라이즈 API 클라이언트.
 
     무료 tier 분당 60건. 금융 특화 뉴스로 GDELT보다 노이즈가 적다.
+    NewsArticlesPort.fetch_articles(query=symbol) 와 AnalystRatingPort 양쪽 구현.
     """
 
     def __init__(self) -> None:

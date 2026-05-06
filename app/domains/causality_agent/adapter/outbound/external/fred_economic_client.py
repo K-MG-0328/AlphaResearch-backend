@@ -4,6 +4,9 @@ from typing import Any, Dict, List
 
 import httpx
 
+from app.domains.causality_agent.application.port.out.economic_ports import (
+    EconomicSeriesPort,
+)
 from app.infrastructure.config.settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -12,7 +15,7 @@ _BASE = "https://api.stlouisfed.org/fred/series/observations"
 _SERIES = ["FEDFUNDS", "CPIAUCSL", "UNRATE"]
 
 
-class FredEconomicClient:
+class FredEconomicClient(EconomicSeriesPort):
     """FRED API 경제 시계열 클라이언트 (날짜 범위 기반)."""
 
     async def fetch_series(

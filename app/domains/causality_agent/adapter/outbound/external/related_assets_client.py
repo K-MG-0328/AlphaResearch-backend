@@ -5,6 +5,10 @@ from typing import Any, Dict, List
 
 import yfinance as yf
 
+from app.domains.causality_agent.application.port.out.benchmark_ports import (
+    RelatedAssetsPort,
+)
+
 logger = logging.getLogger(__name__)
 
 _ASSETS = [
@@ -16,7 +20,7 @@ _ASSETS = [
 ]
 
 
-class RelatedAssetsClient:
+class RelatedAssetsClient(RelatedAssetsPort):
     """VIX·원유·금·미국채·엔화 시계열 수집 (yfinance)."""
 
     async def fetch(

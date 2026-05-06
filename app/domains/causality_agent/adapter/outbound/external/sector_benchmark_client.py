@@ -14,12 +14,15 @@ from typing import Any, Dict, Optional
 
 import yfinance as yf
 
+from app.domains.causality_agent.application.port.out.benchmark_ports import (
+    SectorBenchmarkPort,
+)
 from app.infrastructure.external.sector_etf_directory import lookup_sector_etf
 
 logger = logging.getLogger(__name__)
 
 
-class SectorBenchmarkClient:
+class SectorBenchmarkClient(SectorBenchmarkPort):
     """ticker → 섹터 ETF OHLCV(close) 시계열. 매핑 없으면 None."""
 
     async def fetch(
