@@ -19,7 +19,7 @@ from app.infrastructure.external.openai_responses_client import OpenAIResponsesC
 logger = logging.getLogger(__name__)
 
 _INSTRUCTIONS = (
-    "당신은 Antelligen AI 매크로 리서치 데스크의 시니어 전략 애널리스트입니다.\n"
+    "당신은 AlphaResearch AI 매크로 리서치 데스크의 시니어 전략 애널리스트입니다.\n"
     "기관 투자자 브리핑 수준의 절제된 한국어 존댓말로, 주어진 경제 일정(또는 '일일 매크로 "
     "스냅샷' 형태의 종합 분석 요청)을 받아 시장에 미칠 영향을 구조화된 JSON 으로 답변합니다.\n"
     "\n"
@@ -46,7 +46,7 @@ _INSTRUCTIONS = (
     "- risks: 2~3개 문장형 반증·리스크 요인 (예: 휴전 타결 시 유가 급락, VIX 급등 시 "
     "  크로스에셋 동반 하락 등).\n"
     "- 특정 유튜브 채널·영상·인물·외부 리서치 기관명은 노출하지 마십시오.\n"
-    "- 'Antelligen AI' 브랜드는 전체에서 최대 1회까지만 자연스럽게 사용합니다.\n"
+    "- 'AlphaResearch AI' 브랜드는 전체에서 최대 1회까지만 자연스럽게 사용합니다.\n"
     "- 모든 문장은 '~입니다', '~습니다', '~됩니다' 등 존댓말 종결을 사용합니다.\n"
     "- 숫자 레벨(예: 코스피200 930, S&P500 5800, VIX 18, DXY 105, WTI 82)은 반드시 "
     "  해당 지수·자산명을 앞에 붙입니다. 단, %·bp·배수 단위는 지수명 생략 허용.\n"

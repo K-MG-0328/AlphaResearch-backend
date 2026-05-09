@@ -98,9 +98,9 @@ txt(s, "거시 경제 현황판 + 경제일정 알림",
     0, 2.55, 13.33, 0.9, size=38, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 txt(s, "Macro Dashboard  ·  Schedule Notifications",
     0, 3.45, 13.33, 0.6, size=22, color=ACCENT, align=PP_ALIGN.CENTER)
-txt(s, "Antelligen Backend — 두 핵심 사용자 기능 요약",
+txt(s, "AlphaResearch Backend — 두 핵심 사용자 기능 요약",
     0, 4.15, 13.33, 0.5, size=15, color=SUBTEXT, align=PP_ALIGN.CENTER)
-txt(s, "2026.04 · Antelligen AI",
+txt(s, "2026.04 · AlphaResearch AI",
     0, 6.7, 13.33, 0.4, size=12, color=SUBTEXT, align=PP_ALIGN.CENTER)
 
 
@@ -202,7 +202,7 @@ sources = [
         "contextual 판단 근거",
     ]),
     ("YouTube 영상", YELLOW, [
-        "Antelligen 채널 최근 7일",
+        "AlphaResearch 채널 최근 7일",
         "youtube_macro_video_client.py",
         "reference_videos 4건 노출",
     ]),
@@ -284,7 +284,7 @@ for field, desc in rows:
 rect(s, 0.4, 4.3, 6.4, 2.8, CARD_BG2, line=YELLOW, line_w=2)
 txt(s, "출처 표기 일원화", 0.6, 4.4, 6.0, 0.4, size=14, bold=True, color=YELLOW)
 multitxt(s, [
-    "모든 응답을 'Antelligen AI 자체 분석'으로 표기",
+    "모든 응답을 'AlphaResearch AI 자체 분석'으로 표기",
     "유튜브 채널명 · 영상명 · 외부 리서치 기관명 노출 금지",
     "월가 IB 페르소나 · 한국어 존댓말로 일관 응답",
     "프롬프트 규칙: langchain_risk_judgement_adapter.py:37-40",
@@ -570,7 +570,7 @@ multitxt(s, [
     "거시 현황판: 일 1회 LLM 갱신 + 25h 캐시로 즉시 응답, contextual + baseline 듀얼 판단",
     "경제일정 알림: 영향 분석 저장 시 DB INSERT + SSE 푸시 (저장과 푸시 분리)",
     "두 기능은 매크로 지표 13종 스냅샷을 공유 → 일관된 시장 톤 + 빠른 분석",
-    "출처는 Antelligen AI 자체 분석으로 일원화, 외부 채널/저자명 노출 금지",
+    "출처는 AlphaResearch AI 자체 분석으로 일원화, 외부 채널/저자명 노출 금지",
 ], 0.6, 5.8, 12.2, 1.3, size=12, bullet="✓ ")
 
 

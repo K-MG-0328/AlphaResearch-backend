@@ -127,7 +127,7 @@ class Settings(BaseSettings):
 
     # US market support
     enable_us_tickers: bool = False
-    sec_edgar_user_agent: str = "Antelligen research@example.com"
+    sec_edgar_user_agent: str = "AlphaResearch research@example.com"
 
     # Event Impact (PR2/PR3) — AR 메트릭 통합 feature flags.
     # event_impact_in_importance_prompt: EventImportanceService의 LLM prompt에 AR 텍스트 주입.
