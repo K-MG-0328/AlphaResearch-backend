@@ -1,6 +1,6 @@
 # Macro Dashboard + Schedule Notifications — 기능 요약
 
-> Antelligen Backend의 두 핵심 사용자 기능: **거시 경제 현황판** 과 **경제일정 알림**
+> AlphaResearch Backend의 두 핵심 사용자 기능: **거시 경제 현황판** 과 **경제일정 알림**
 
 ---
 
@@ -30,7 +30,7 @@ APScheduler (01:00 daily, macro_jobs.py:30)
 JudgeMarketRiskUseCase.execute()
        │
        ├─▶ StudyNoteFileReader      (학습 노트 파일)
-       ├─▶ YoutubeMacroVideoClient   (Antelligen 채널 최근 7일)
+       ├─▶ YoutubeMacroVideoClient   (AlphaResearch 채널 최근 7일)
        └─▶ LangchainRiskJudgement    (OpenAI GPT)
               │
               ├─ contextual: 학습/영상 기반 판단
@@ -48,7 +48,7 @@ GET /api/v1/macro/market-risk  →  즉시 응답
 | 소스 | 용도 | 위치 |
 |------|------|------|
 | 로컬 학습 노트 | contextual 판단 근거 | `StudyNoteFileReader` |
-| YouTube Data API | 참고 영상 4건 (Antelligen 채널 `UC2-YdiOkgqWzIdDwCYW1utw`, 최근 7일) | `youtube_macro_video_client.py` |
+| YouTube Data API | 참고 영상 4건 (AlphaResearch 채널 `UC2-YdiOkgqWzIdDwCYW1utw`, 최근 7일) | `youtube_macro_video_client.py` |
 | OpenAI GPT | 듀얼 판단 생성 | `langchain_risk_judgement_adapter.py:8-14` |
 
 ### 2.4 응답 구조
@@ -81,7 +81,7 @@ GET /api/v1/macro/market-risk  →  BaseResponse[MarketRiskJudgementResponse]
 1. **이중 판단(contextual + baseline)**
    학습 노트 기반 판단과 일반 IB 페르소나 판단을 **분리 노출** → 프론트가 사용자에게 어느 쪽을 보여줄지 선택 가능
 2. **출처 표기 일원화**
-   모든 응답을 "Antelligen AI 자체 분석" 으로 표기. 유튜브 채널명·영상명·외부 리서치 기관명은 절대 노출 금지 (`langchain_risk_judgement_adapter.py:37-40`)
+   모든 응답을 "AlphaResearch AI 자체 분석" 으로 표기. 유튜브 채널명·영상명·외부 리서치 기관명은 절대 노출 금지 (`langchain_risk_judgement_adapter.py:37-40`)
 
 ---
 

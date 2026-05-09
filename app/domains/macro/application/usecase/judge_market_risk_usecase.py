@@ -93,8 +93,8 @@ class JudgeMarketRiskUseCase:
         fallback_message = ""
         if not has_context:
             fallback_message = (
-                "Antelligen AI 내부 매크로 데이터가 일시적으로 확보되지 않아 데이터 기반 판단은 "
-                "유보하였습니다. 현재 화면에는 Antelligen AI 매크로 데스크의 일반 견해만 노출됩니다."
+                "AlphaResearch AI 내부 매크로 데이터가 일시적으로 확보되지 않아 데이터 기반 판단은 "
+                "유보하였습니다. 현재 화면에는 AlphaResearch AI 매크로 데스크의 일반 견해만 노출됩니다."
             )
 
         contextual_reasons_top = contextual_reasons[:3]

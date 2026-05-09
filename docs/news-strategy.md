@@ -26,7 +26,7 @@
 | Python | 3.13 이상 |
 | Docker Desktop | 실행 중 |
 | PostgreSQL 컨테이너 | `pgvector_db` 포트 5433 |
-| MySQL 컨테이너 | `antelligen_mysql` 포트 3307 |
+| MySQL 컨테이너 | `legacy_mysql` 포트 3307 (현재는 PostgreSQL 단일화 — 이 항목은 stale) |
 
 ### Docker 컨테이너 시작
 
@@ -446,7 +446,7 @@ postgres_db=vectordb
 
 # MySQL (사용자 저장 기사)
 MYSQL_USER=root
-MYSQL_PASSWORD=eddi@123
+MYSQL_PASSWORD=your-mysql-password
 MYSQL_HOST=localhost
 MYSQL_PORT=3307
 MYSQL_SCHEMA=multi_agent_db
